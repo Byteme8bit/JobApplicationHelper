@@ -1,0 +1,16 @@
+{
+  "templateFilePath": "path/to/your/cover_letter_template.docx",
+  "outputFilePath": "path/to/your/output/directory/",
+  "overwriteOutput": false,
+  "placeholders": {
+    "Date": "January 8, 2025",
+    "CompanyName": "",
+    "TheirAddress": "",
+    "PositionName": "",
+    "JobBoard": "",
+    "RelatedSentence1": "I have been closely following [CompanyName]'s work in [industry/field] and I am particularly impressed with [specific achievement or project].",
+    "DynamicAIContentRelatingMeToCompany": "This will be dynamically generated based on the company and my skills.",
+    "RelatedSentence2": "My experience in [relevant skill 1] and [relevant skill 2] aligns perfectly with the requirements of this role.",
+    "RelatedSentence3": "I am confident that I can make a significant contribution to [CompanyName]'s continued success."
+  }
+}
