@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from datetime import date
 from docx import Document
 
 
@@ -63,6 +64,10 @@ if __name__ == "__main__":
     config_path = args.config if args.config else "config.json"
     config = load_config(config_path)
 
+    # Automatically generate date
+    today = date.today().strftime("%Y-%m-%d")
+
+
     while True:
         template_path = config.get("template_path")
         if template_path is None:
@@ -79,8 +84,19 @@ if __name__ == "__main__":
         if output_filename is None:
             output_filename = input("Enter output file name: ")
 
-        if os.path.exists(output_filename):
+        overwrite = None  # Initialize overwrite variable
+        while os.path.exists(output_filename):
             overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
+            if overwrite.lower() == 'y':
+                break  # Exit the loop if user wants to overwrite
+            elif overwrite.lower() == 'n':
+                output_filename = input("Enter a different output file name: ")  # Ask for a new name
+                overwrite = None  # Reset overwrite for the new filename check
+            else:
+                print("Invalid input. Please enter 'y' or 'n'.")  # Handle invalid input
+        
+        if overwrite is not None and overwrite.lower() != 'y':  # Check if overwrite was requested and confirmed
+            continue  # Ask for input again if not overwriting
             if overwrite.lower() == 'y':
                 break
             else:
@@ -94,6 +110,10 @@ if __name__ == "__main__":
             break
         value = input(f"Enter value for {key}: ")
         data[key] = value
+
+    # Add the automatically generated date to the data dictionary
+    data["date"] = today
+
 
     try:
         generate_document(template_path, output_filename, data)
