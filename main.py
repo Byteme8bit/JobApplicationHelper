@@ -44,16 +44,27 @@ def generate_document(template_path, output_path, data):
         raise ValueError(f"Unmatched placeholders found: {', '.join(unmatched)}")
 
 
+import json
+
 if __name__ == "__main__":
+    config = load_config("config.json")
+
     while True:
-        template_path = input("Enter template file path: ")
+        template_path = config.get("template_path")
+        if template_path is None:
+            template_path = input("Enter template file path: ")
         if not os.path.exists(template_path):
             print("Error: Template file not found. Please enter a valid path.")
+            if template_path is not None:  # Only clear the config value if it was from the file
+                config["template_path"] = None  # Clear incorrect value from config
             continue  # Ask for input again
         break
 
     while True:
-        output_filename = input("Enter output file name: ")
+        output_filename = config.get("output_filename")
+        if output_filename is None:
+            output_filename = input("Enter output file name: ")
+
         if os.path.exists(output_filename):
             overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
             if overwrite.lower() == 'y':
@@ -62,7 +73,7 @@ if __name__ == "__main__":
                 continue  # Ask for input again
         break
 
-    data = {}
+    data = config.get("data", {})  # Load data from config, default to empty dict
     while True:
         key = input("Enter placeholder name (or type 'done'): ")
         if key == "done":
@@ -75,3 +86,12 @@ if __name__ == "__main__":
         print(f"Document '{output_filename}' generated successfully.")
     except Exception as e:
         print(f"Error: {e}")
+
+
+def load_config(path):
+    """Loads config from a JSON file. Returns an empty dictionary if the file doesn't exist."""
+    try:
+        with open(path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
