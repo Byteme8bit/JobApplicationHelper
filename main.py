@@ -1,5 +1,6 @@
 from docx import Document
 import os
+import json
 
 
 def generate_document(template_path, output_path, data):
@@ -44,7 +45,6 @@ def generate_document(template_path, output_path, data):
         raise ValueError(f"Unmatched placeholders found: {', '.join(unmatched)}")
 
 
-
 def load_config(path):
     """Loads config from a JSON file. Returns an empty dictionary if the file doesn't exist."""
     try:
@@ -53,8 +53,6 @@ def load_config(path):
     except FileNotFoundError:
         return {}
 
-
-import json
 
 if __name__ == "__main__":
     config = load_config("config.json")
@@ -96,12 +94,3 @@ if __name__ == "__main__":
         print(f"Document '{output_filename}' generated successfully.")
     except Exception as e:
         print(f"Error: {e}")
-
-
-def load_config(path):
-    """Loads config from a JSON file. Returns an empty dictionary if the file doesn't exist."""
-    try:
-        with open(path, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
