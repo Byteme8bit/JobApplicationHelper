@@ -27,10 +27,10 @@ def generate_document(template_path, output_path, data):
                     for key, value in data.items():
                         line = line.replace(f"%{key}%", value)
                     outfile.write(line)
-            raise ValueError("Unsupported file type. Only .docx and .txt are supported.")
-
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file not found: {template_path}")
+    except ValueError as e:
+        raise
     except Exception as e:
         raise IOError(f"Error processing template: {e}")
 
@@ -70,4 +70,8 @@ if __name__ == "__main__":
         value = input(f"Enter value for {key}: ")
         data[key] = value
 
-    generate_document(template_path, output_filename, data)
+    try:
+        generate_document(template_path, output_filename, data)
+        print(f"Document '{output_filename}' generated successfully.")
+    except Exception as e:
+        print(f"Error: {e}")
