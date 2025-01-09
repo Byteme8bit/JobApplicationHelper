@@ -85,42 +85,44 @@ if __name__ == "__main__":
         if output_filename is None:
             output_filename = input("Enter output file name: ")
 
-        overwrite = config.get("overwriteOutput") if not None else False  # Initialize overwrite variable
+        overwrite = config.get("overwriteOutput")  # Initialize overwrite variable
+        if overwrite is None:
+            overwrite = False
 
         while os.path.exists(output_filename):
             overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
-            if overwrite.lower() == 'y' or overwrite:
+            if overwrite:
                 break  # Exit the loop if user wants to overwrite
-            elif overwrite.lower() == 'n' or not overwrite:
+            elif not overwrite:
                 output_filename = input("Enter a different output file name: ")  # Ask for a new name
                 overwrite = None  # Reset overwrite for the new filename check
             else:
                 print("Invalid input. Please enter 'y' or 'n'.")  # Handle invalid input
 
-        if (overwrite.lower() == 'y' or overwrite) and output_filename is not None:
+        if overwrite and output_filename is not None:
             break  # Exit the loop if user wants to overwrite
         else:
             continue  # Ask for input again if not overwriting
 
     print(f"Output file will be saved as: {output_filename}")
 
-    data = config.get("data", {})  # Load data from config, default to empty dict
+    placeholders = config.get("placeholders", {})  # Load placeholders from config, default to empty dict
 
-    if not data:  # Only ask for placeholders if data is empty
+    if not placeholders:  # Only ask for placeholders if data is empty
         print("No data found in config. Please enter placeholder values.")
         while True:
             key = input("Enter placeholder name (or type 'done'): ")
             if key == "done":
                 break
             value = input(f"Enter value for {key}: ")
-            data[key] = value
+            placeholders[key] = value
 
     # Add the automatically generated date to the data dictionary
-    data["date"] = today
+    placeholders["date"] = today
 
     try:
         print("Generating document...")
-        generate_document(template_path, output_filename, data)
+        generate_document(template_path, output_filename, placeholders)
         print(f"Document '{output_filename}' generated successfully.")
     except Exception as e:
         print(f"Error: {e}")
