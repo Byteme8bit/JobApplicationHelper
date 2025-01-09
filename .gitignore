@@ -170,3 +170,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 .aider.*
+config.json
+
+.idea/
+
+.venv2/
