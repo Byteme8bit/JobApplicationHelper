@@ -62,6 +62,7 @@ if __name__ == "__main__":
 
     config_path = args.config if args.config else input(
         "Enter the path to the config file (default: config.json): ") or "config.json"
+    print(f"Loading config from {config_path}...")
     config = load_config(config_path)
 
     # Automatically generate date
@@ -76,6 +77,7 @@ if __name__ == "__main__":
             if template_path is not None:  # Only clear the config value if it was from the file
                 config["template_path"] = None  # Clear incorrect value from config
             continue  # Ask for input again
+        print(f"Using template file: {template_path}")
         break
 
     while True:
@@ -100,9 +102,12 @@ if __name__ == "__main__":
         else:
             continue  # Ask for input again if not overwriting
 
+    print(f"Output file will be saved as: {output_filename}")
+
     data = config.get("data", {})  # Load data from config, default to empty dict
 
     if not data:  # Only ask for placeholders if data is empty
+        print("No data found in config. Please enter placeholder values.")
         while True:
             key = input("Enter placeholder name (or type 'done'): ")
             if key == "done":
@@ -114,6 +119,7 @@ if __name__ == "__main__":
     data["date"] = today
 
     try:
+        print("Generating document...")
         generate_document(template_path, output_filename, data)
         print(f"Document '{output_filename}' generated successfully.")
     except Exception as e:
