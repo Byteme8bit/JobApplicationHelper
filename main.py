@@ -13,9 +13,8 @@ def generate_document(template_path, output_path, data):
     Args:
         template_path: Path to the template file.
         output_path: Path to save the generated document.
-         Dictionary containing placeholder names and their replacements.
+        data: Dictionary containing placeholder names and their replacements.
     """
-
     try:
         if template_path.endswith(".docx"):
             doc = Document(template_path)
@@ -61,15 +60,15 @@ if __name__ == "__main__":
     parser.add_argument("--config", help="Path to the config file (default: config.json)")
     args = parser.parse_args()
 
-    config_path = args.config if args.config else "config.json"
+    config_path = args.config if args.config else input(
+        "Enter the path to the config file (default: config.json): ") or "config.json"
     config = load_config(config_path)
 
     # Automatically generate date
     today = date.today().strftime("%Y-%m-%d")
 
-
     while True:
-        template_path = config.get("template_path")
+        template_path = config.get("templateFilePath")
         if template_path is None:
             template_path = input("Enter template file path: ")
         if not os.path.exists(template_path):
@@ -80,40 +79,39 @@ if __name__ == "__main__":
         break
 
     while True:
-        output_filename = config.get("output_filename")
+        output_filename = config.get("outputFilePath")
         if output_filename is None:
             output_filename = input("Enter output file name: ")
 
-        overwrite = None  # Initialize overwrite variable
+        overwrite = config.get("overwriteOutput") if not None else False  # Initialize overwrite variable
+
         while os.path.exists(output_filename):
             overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
-            if overwrite.lower() == 'y':
+            if overwrite.lower() == 'y' or overwrite:
                 break  # Exit the loop if user wants to overwrite
-            elif overwrite.lower() == 'n':
+            elif overwrite.lower() == 'n' or not overwrite:
                 output_filename = input("Enter a different output file name: ")  # Ask for a new name
                 overwrite = None  # Reset overwrite for the new filename check
             else:
                 print("Invalid input. Please enter 'y' or 'n'.")  # Handle invalid input
-        
-        if overwrite is not None and overwrite.lower() != 'y':  # Check if overwrite was requested and confirmed
+
+        if (overwrite.lower() == 'y' or overwrite) and output_filename is not None:
+            break  # Exit the loop if user wants to overwrite
+        else:
             continue  # Ask for input again if not overwriting
-            if overwrite.lower() == 'y':
-                break
-            else:
-                continue  # Ask for input again
-        break
 
     data = config.get("data", {})  # Load data from config, default to empty dict
-    while True:
-        key = input("Enter placeholder name (or type 'done'): ")
-        if key == "done":
-            break
-        value = input(f"Enter value for {key}: ")
-        data[key] = value
+
+    if not data:  # Only ask for placeholders if data is empty
+        while True:
+            key = input("Enter placeholder name (or type 'done'): ")
+            if key == "done":
+                break
+            value = input(f"Enter value for {key}: ")
+            data[key] = value
 
     # Add the automatically generated date to the data dictionary
     data["date"] = today
-
 
     try:
         generate_document(template_path, output_filename, data)
