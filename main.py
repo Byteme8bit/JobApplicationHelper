@@ -44,6 +44,16 @@ def generate_document(template_path, output_path, data):
         raise ValueError(f"Unmatched placeholders found: {', '.join(unmatched)}")
 
 
+
+def load_config(path):
+    """Loads config from a JSON file. Returns an empty dictionary if the file doesn't exist."""
+    try:
+        with open(path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+
+
 import json
 
 if __name__ == "__main__":
