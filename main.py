@@ -1,6 +1,8 @@
-from docx import Document
-import os
+import argparse
 import json
+import os
+
+from docx import Document
 
 
 def generate_document(template_path, output_path, data):
@@ -55,7 +57,12 @@ def load_config(path):
 
 
 if __name__ == "__main__":
-    config = load_config("config.json")
+    parser = argparse.ArgumentParser(description="Generate documents from templates.")
+    parser.add_argument("--config", help="Path to the config file (default: config.json)")
+    args = parser.parse_args()
+
+    config_path = args.config if args.config else "config.json"
+    config = load_config(config_path)
 
     while True:
         template_path = config.get("template_path")
