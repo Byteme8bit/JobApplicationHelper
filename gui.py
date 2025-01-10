@@ -73,6 +73,12 @@ def run_gui():
     placeholder_var = tk.StringVar()
     replace_with_var = tk.StringVar()
 
+    labelCol = 0
+    buttonA = 1
+    textboxCol = 2
+    scrollbarCol = 3
+    buttonB = 4
+
     #Config file browse button
     config_browse_button = ttk.Button(root, text="Browse", command=browse_config_file)
     config_browse_button.grid(row=0, column=1, padx=5, pady=5)
@@ -97,23 +103,23 @@ def run_gui():
 
     #Placeholders text area
     placeholders_text = tk.Text(root, height=10, width=30)
-    placeholders_text.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
+    placeholders_text.grid(row=4, column=0, columnspan=2, padx=5, pady=5)
     placeholders_label = ttk.Label(root, text="Placeholders (JSON):")
     placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
 
     #Add placeholder button
     placeholder_entry = ttk.Entry(root, textvariable=placeholder_var)
-    placeholder_entry.grid(row=4, column=0, padx=5, pady=5)
+    placeholder_entry.grid(row=5, column=0, padx=5, pady=5)
     placeholder_label = ttk.Label(root, text="Placeholder:")
-    placeholder_label.grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
+    placeholder_label.grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
 
     replace_with_entry = ttk.Entry(root, textvariable=replace_with_var)
-    replace_with_entry.grid(row=5, column=0, padx=5, pady=5)
+    replace_with_entry.grid(row=6, column=0, padx=5, pady=5)
     replace_with_label = ttk.Label(root, text="Replace With:")
-    replace_with_label.grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
+    replace_with_label.grid(row=6, column=0, sticky=tk.W, padx=5, pady=5)
 
     add_placeholder_button = ttk.Button(root, text="Add Placeholder", command=add_placeholder)
-    add_placeholder_button.grid(row=6, column=0, padx=5, pady=5)
+    add_placeholder_button.grid(row=7, column=0, padx=5, pady=5)
 
     # Generate button
     generate_button = ttk.Button(root, text="Generate Document", command=generate_document_from_gui)
