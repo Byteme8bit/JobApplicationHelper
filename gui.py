@@ -61,6 +61,17 @@ def generate_document_from_gui():
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 
+def edit_placeholder(event):
+    try:
+        line_num = int(placeholders_text.index(tk.CURRENT).split('.')[0])
+        line = placeholders_text.get(f"{line_num}.0", f"{line_num}.end").strip()
+        key, value = line.split(":", 1)
+        placeholder_var.set(key.strip())
+        replace_with_var.set(value.strip())
+    except (ValueError, tk.TclError):
+        messagebox.showerror("Error", "Invalid line selected.")
+
+
 def run_gui():
     global config_path, template_path, output_filename, placeholder_var, replace_with_var, placeholders_text
 
@@ -104,6 +115,7 @@ def run_gui():
     placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=2)
     placeholders_text = tk.Text(root, height=10, width=50)
     placeholders_text.grid(row=3, column=2, columnspan=2, padx=5, pady=2, sticky="nsew")
+    placeholders_text.bind("<Double-Button-1>", edit_placeholder)
 
     #Add placeholder button and entries
     placeholder_label = ttk.Label(root, text="Placeholder:")
