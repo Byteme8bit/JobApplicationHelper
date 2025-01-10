@@ -90,34 +90,34 @@ def run_gui():
     template_browse_button = ttk.Button(root, text="Browse", command=browse_template_file)
     template_browse_button.grid(row=1, column=1, padx=5, pady=2)
     template_path_entry = ttk.Entry(root, textvariable=template_path, width=50)
-    template_path_entry.grid(row=1, column=2, columnspan=3, padx=5, pady=2)
+    template_path_entry.grid(row=1, column=2, columnspan=2, padx=5, pady=2)
 
 
     #Output file name entry
     output_filename_label = ttk.Label(root, text="Output File Name:")
     output_filename_label.grid(row=2, column=0, sticky=tk.W, padx=5, pady=2)
     output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50)
-    output_filename_entry.grid(row=2, column=1, columnspan=4, padx=5, pady=2)
+    output_filename_entry.grid(row=2, column=2, columnspan=2, padx=5, pady=2)
 
     #Placeholders text area
     placeholders_label = ttk.Label(root, text="Placeholders (JSON):")
     placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=2)
     placeholders_text = tk.Text(root, height=10, width=50)
-    placeholders_text.grid(row=3, column=1, columnspan=4, padx=5, pady=2, sticky="nsew")
+    placeholders_text.grid(row=3, column=2, columnspan=2, padx=5, pady=2, sticky="nsew")
 
     #Add placeholder button and entries
     placeholder_label = ttk.Label(root, text="Placeholder:")
     placeholder_label.grid(row=4, column=0, sticky=tk.W, padx=5, pady=2)
     placeholder_entry = ttk.Entry(root, textvariable=placeholder_var, width=50)
-    placeholder_entry.grid(row=4, column=1, columnspan=2, padx=5, pady=2)
+    placeholder_entry.grid(row=4, column=2, columnspan=2, padx=5, pady=2)
 
     replace_with_label = ttk.Label(root, text="Replace With:")
     replace_with_label.grid(row=5, column=0, sticky=tk.W, padx=5, pady=2)
     replace_with_entry = ttk.Entry(root, textvariable=replace_with_var, width=50)
-    replace_with_entry.grid(row=5, column=1, columnspan=2, padx=5, pady=2)
+    replace_with_entry.grid(row=5, column=2, columnspan=2, padx=5, pady=2)
 
     add_placeholder_button = ttk.Button(root, text="Add Placeholder", command=add_placeholder)
-    add_placeholder_button.grid(row=4, column=3, rowspan=2, padx=5, pady=2)
+    add_placeholder_button.grid(row=4, column=4, rowspan=2, columnspan=2, padx=5, pady=2)
 
 
     # Generate button
