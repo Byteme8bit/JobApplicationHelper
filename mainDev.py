@@ -2,57 +2,8 @@ import argparse
 import json
 import os
 from datetime import date
-from docx import Document
-from gui import load_config_file, browse_config_file, browse_template_file, add_placeholder
-
-def generate_document(template_path, output_path, data):
-    """Generates a document, replacing placeholders and resizing text to fit.
-
-    Supports .docx and .txt files.
-
-    Args:
-        template_path: Path to the template file.
-        output_path: Path to save the generated document.
-         Dictionary containing placeholder names and their replacements.
-    """
-    try:
-        if template_path.endswith(".docx"):
-            doc = Document(template_path)
-            for paragraph in doc.paragraphs:
-                for key, value in data.items():
-                    paragraph.text = paragraph.text.replace(f"%{key}%", value)
-            doc.save(output_path)
-
-        elif template_path.endswith(".txt"):
-            with open(template_path, "r") as infile, open(output_path, "w") as outfile:
-                for line in infile:
-                    for key, value in data.items():
-                        line = line.replace(f"%{key}%", value)
-                    outfile.write(line)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Template file not found: {template_path}")
-    except ValueError as e:
-        raise
-    except Exception as e:
-        raise IOError(f"Error processing template: {e}")
-
-    # Check for unmatched placeholders
-    if template_path.endswith(".docx"):
-        unmatched = [key for paragraph in doc.paragraphs for key in data if f"%{key}%" in paragraph.text]
-    elif template_path.endswith(".txt"):
-        with open(output_path, "r") as outfile:
-            unmatched = [key for line in outfile for key in data if f"%{key}%" in line]
-    if unmatched:
-        raise ValueError(f"Unmatched placeholders found: {', '.join(unmatched)}")
-
-
-def load_config(path):
-    """Loads config from a JSON file. Returns an empty dictionary if the file doesn't exist."""
-    try:
-        with open(path, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {}
+from gui import run_gui #Import run_gui function
+from utils import generate_document, load_config #Import functions from utils
 
 
 if __name__ == "__main__":
@@ -63,7 +14,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.GUI:
-        from run_gui import run_gui
         run_gui() # Call the GUI function from the imported module
     else:
         config_path = args.config if args.config else input(

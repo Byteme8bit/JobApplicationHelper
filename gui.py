@@ -3,7 +3,7 @@ from tkinter import filedialog, messagebox
 import json
 import os
 from tkinter import ttk
-from mainDev import generate_document, load_config # Import necessary functions
+from utils import generate_document, load_config #Import functions from utils
 
 
 def browse_config_file():
@@ -73,10 +73,50 @@ def run_gui():
     placeholder_var = tk.StringVar()
     replace_with_var = tk.StringVar()
 
-    # ... (rest of your GUI code remains the same) ...
+    #Config file browse button
+    config_browse_button = ttk.Button(root, text="Browse", command=browse_config_file)
+    config_browse_button.grid(row=0, column=1, padx=5, pady=5)
+    config_path_entry = ttk.Entry(root, textvariable=config_path)
+    config_path_entry.grid(row=0, column=0, padx=5, pady=5)
+    config_path_label = ttk.Label(root, text="Config File Path:")
+    config_path_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+
+    #Template file browse button
+    template_browse_button = ttk.Button(root, text="Browse", command=browse_template_file)
+    template_browse_button.grid(row=1, column=1, padx=5, pady=5)
+    template_path_entry = ttk.Entry(root, textvariable=template_path)
+    template_path_entry.grid(row=1, column=0, padx=5, pady=5)
+    template_path_label = ttk.Label(root, text="Template File Path:")
+    template_path_label.grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+
+    #Output file name entry
+    output_filename_entry = ttk.Entry(root, textvariable=output_filename)
+    output_filename_entry.grid(row=2, column=0, padx=5, pady=5)
+    output_filename_label = ttk.Label(root, text="Output File Name:")
+    output_filename_label.grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+
+    #Placeholders text area
+    placeholders_text = tk.Text(root, height=10, width=30)
+    placeholders_text.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
+    placeholders_label = ttk.Label(root, text="Placeholders (JSON):")
+    placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+
+    #Add placeholder button
+    placeholder_entry = ttk.Entry(root, textvariable=placeholder_var)
+    placeholder_entry.grid(row=4, column=0, padx=5, pady=5)
+    placeholder_label = ttk.Label(root, text="Placeholder:")
+    placeholder_label.grid(row=4, column=0, sticky=tk.W, padx=5, pady=5)
+
+    replace_with_entry = ttk.Entry(root, textvariable=replace_with_var)
+    replace_with_entry.grid(row=5, column=0, padx=5, pady=5)
+    replace_with_label = ttk.Label(root, text="Replace With:")
+    replace_with_label.grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
+
+    add_placeholder_button = ttk.Button(root, text="Add Placeholder", command=add_placeholder)
+    add_placeholder_button.grid(row=6, column=0, padx=5, pady=5)
 
     # Generate button
     generate_button = ttk.Button(root, text="Generate Document", command=generate_document_from_gui)
-    generate_button.grid(row=8, column=2, columnspan=2, pady=10)
+    generate_button.grid(row=8, column=0, columnspan=2, pady=10)
 
     root.mainloop()
