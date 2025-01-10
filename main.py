@@ -6,6 +6,7 @@ from docx import Document
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
+
 def generate_document(template_path, output_path, data):
     """Generates a document, replacing placeholders and resizing text to fit.
 
@@ -55,6 +56,7 @@ def load_config(path):
     except FileNotFoundError:
         return {}
 
+
 def browse_config_file():
     """Open a file dialog to select the config.json file."""
     file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
@@ -62,11 +64,13 @@ def browse_config_file():
         config_path_var.set(file_path)
         load_config_file()
 
+
 def browse_template_file():
     """Open a file dialog to select the template file."""
     file_path = filedialog.askopenfilename(filetypes=[("Word files", "*.docx"), ("Text files", "*.txt")])
     if file_path:
         template_path_var.set(file_path)
+
 
 def load_config_file():
     """Load the content of the selected config.json file and populate the corresponding fields."""
@@ -80,33 +84,58 @@ def load_config_file():
     output_path_var.set(config.get("outputFilePath", ""))
     placeholders_var.set(json.dumps(config.get("placeholders", {}), indent=4))
 
+
 def run_gui():
     # Create the main window
     root = tk.Tk()
     root.title("Job Application Helper")
 
+    labelCol = 0
+    spacerCol = 1
+    secondCol = spacerCol + 1
+    thirdCol = secondCol + 1
+    fourthCol = thirdCol + 1
+    fifthCol = fourthCol + 1
+    sixthCol = fifthCol + 1
+
     # Config file path
-    tk.Label(root, text="Config file path:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
-    tk.Button(root, text="Browse", command=browse_config_file).grid(row=0, column=1, padx=5, pady=5, sticky="w")
+    tk.Label(root, text="Config file path:").grid(row=0, column=labelCol, padx=5, pady=5, sticky="e")
+    tk.Button(root, text="Browse", command=browse_config_file).grid(row=0, column=secondCol, padx=5, pady=5, sticky="w")
     config_path_var = tk.StringVar()
-    tk.Entry(root, textvariable=config_path_var, width=50).grid(row=0, column=2, padx=5, pady=5, sticky="w")
-    tk.Button(root, text="Load Config", command=load_config_file).grid(row=0, column=3, padx=5, pady=5, sticky="w")
+    tk.Entry(root, textvariable=config_path_var, width=50).grid(row=0, column=thirdCol, padx=5, pady=5, sticky="w")
+    tk.Button(root, text="Load Config", command=load_config_file).grid(row=0, column=fourthCol, padx=5, pady=5,
+                                                                       sticky="w")
 
     # Template file path
-    tk.Label(root, text="Template file path:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
-    tk.Button(root, text="Browse", command=browse_template_file).grid(row=1, column=1, padx=5, pady=5, sticky="w")
+    tk.Label(root, text="Template file path:").grid(row=1, column=labelCol, padx=5, pady=5, sticky="e")
+    tk.Button(root, text="Browse", command=browse_template_file).grid(row=1, column=secondCol, padx=5, pady=5,
+                                                                      sticky="w")
     template_path_var = tk.StringVar()
-    tk.Entry(root, textvariable=template_path_var, width=50).grid(row=1, column=2, padx=5, pady=5, sticky="w")
+    tk.Entry(root, textvariable=template_path_var, width=50).grid(row=1, column=thirdCol, padx=5, pady=5, sticky="w")
 
     # Output file path
-    tk.Label(root, text="Output file path:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(root, text="Output file path:").grid(row=2, column=labelCol, padx=5, pady=5, sticky="e")
     output_path_var = tk.StringVar()
-    tk.Entry(root, textvariable=output_path_var, width=50).grid(row=2, column=1, columnspan=2, padx=5, pady=5, sticky="w")
+    tk.Entry(root, textvariable=output_path_var, width=50).grid(row=2, column=secondCol, columnspan=2, padx=5, pady=5,
+                                                                sticky="w")
+
+    # Placeholder key: value pair boxes
+    tk.Label(root, text="Placeholder (e.g. %FirstName%):").grid(row=3, column=labelCol, padx=5, pady=5, sticky="e")
+    placeholders_var = tk.StringVar()
+    tk.Entry(root, textvariable=placeholders_var, width=50).grid(row=3, column=secondCol, columnspan=1, padx=5, pady=5,
+                                                                 sticky="w")
+    tk.Label(root, text="Replace with:").grid(row=4, column=labelCol, padx=5, pady=5, sticky="e")
+    placeholders_var = tk.StringVar()
+    tk.Entry(root, textvariable=placeholders_var, width=50).grid(row=4, column=secondCol, columnspan=1, padx=5, pady=5,
+                                                                 sticky="w")
 
     # Placeholders
-    tk.Label(root, text="Placeholders:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(root, text="Placeholders:").grid(row=5, column=labelCol, padx=5, pady=5, sticky="e")
     placeholders_var = tk.StringVar()
-    tk.Entry(root, textvariable=placeholders_var, width=50).grid(row=3, column=1, columnspan=2, padx=5, pady=5, sticky="w")
+    tk.Entry(root, textvariable=placeholders_var, width=50).grid(row=3, rowspan=10,
+                                                                 column=secondCol, columnspan=2,
+                                                                 padx=5, pady=5,
+                                                                 sticky="w")
 
     # Adjust column weights to minimize whitespace
     root.grid_columnconfigure(0, weight=0)
@@ -116,6 +145,7 @@ def run_gui():
 
     # Run the main loop
     root.mainloop()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate documents from templates.")
