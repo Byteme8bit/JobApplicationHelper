@@ -75,49 +75,50 @@ def run_gui():
 
     #Config file browse button
     config_path_label = ttk.Label(root, text="Config File Path:")
-    config_path_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-    config_path_entry = ttk.Entry(root, textvariable=config_path, width=50) #Increased width
-    config_path_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=5) #Increased columnspan
+    config_path_label.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+    config_path_entry = ttk.Entry(root, textvariable=config_path, width=50)
+    config_path_entry.grid(row=0, column=1, columnspan=3, padx=5, pady=2)
     config_browse_button = ttk.Button(root, text="Browse", command=browse_config_file)
-    config_browse_button.grid(row=0, column=4, padx=5, pady=5)
+    config_browse_button.grid(row=0, column=4, padx=5, pady=2)
 
     #Template file browse button
     template_path_label = ttk.Label(root, text="Template File Path:")
-    template_path_label.grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-    template_path_entry = ttk.Entry(root, textvariable=template_path, width=50) #Increased width
-    template_path_entry.grid(row=1, column=1, columnspan=3, padx=5, pady=5) #Increased columnspan
+    template_path_label.grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
+    template_path_entry = ttk.Entry(root, textvariable=template_path, width=50)
+    template_path_entry.grid(row=1, column=1, columnspan=3, padx=5, pady=2)
     template_browse_button = ttk.Button(root, text="Browse", command=browse_template_file)
-    template_browse_button.grid(row=1, column=4, padx=5, pady=5)
+    template_browse_button.grid(row=1, column=4, padx=5, pady=2)
 
     #Output file name entry
     output_filename_label = ttk.Label(root, text="Output File Name:")
-    output_filename_label.grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-    output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50) #Increased width
-    output_filename_entry.grid(row=2, column=1, columnspan=3, padx=5, pady=5) #Increased columnspan
+    output_filename_label.grid(row=2, column=0, sticky=tk.W, padx=5, pady=2)
+    output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50)
+    output_filename_entry.grid(row=2, column=1, columnspan=3, padx=5, pady=2)
 
     #Placeholders text area
     placeholders_label = ttk.Label(root, text="Placeholders (JSON):")
-    placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
-    placeholders_text = tk.Text(root, height=10, width=30)
-    placeholders_text.grid(row=3, column=1, columnspan=4, padx=5, pady=5) #Increased columnspan
+    placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=2)
+    placeholders_text = tk.Text(root, height=10, width=50) #Increased width
+    placeholders_text.grid(row=3, column=1, columnspan=4, padx=5, pady=2, sticky="nsew") #Increased columnspan, added sticky
 
     #Add placeholder button and entries
     placeholder_label = ttk.Label(root, text="Placeholder:")
-    placeholder_label.grid(row=5, column=0, sticky=tk.W, padx=5, pady=5)
+    placeholder_label.grid(row=4, column=0, sticky=tk.W, padx=5, pady=2)
     placeholder_entry = ttk.Entry(root, textvariable=placeholder_var)
-    placeholder_entry.grid(row=5, column=1, padx=5, pady=5)
+    placeholder_entry.grid(row=4, column=1, padx=5, pady=2)
 
     replace_with_label = ttk.Label(root, text="Replace With:")
-    replace_with_label.grid(row=6, column=0, sticky=tk.W, padx=5, pady=5)
+    replace_with_label.grid(row=5, column=0, sticky=tk.W, padx=5, pady=2)
     replace_with_entry = ttk.Entry(root, textvariable=replace_with_var)
-    replace_with_entry.grid(row=6, column=1, padx=5, pady=5)
+    replace_with_entry.grid(row=5, column=1, padx=5, pady=2)
 
     add_placeholder_button = ttk.Button(root, text="Add Placeholder", command=add_placeholder)
-    add_placeholder_button.grid(row=5, column=2, rowspan=2, padx=5, pady=5) #rowspan=2
+    add_placeholder_button.grid(row=4, column=2, rowspan=2, padx=5, pady=2)
 
 
     # Generate button
     generate_button = ttk.Button(root, text="Generate Document", command=generate_document_from_gui)
-    generate_button.grid(row=7, column=0, columnspan=5, pady=10) #Increased columnspan
+    generate_button.grid(row=6, column=0, columnspan=5, pady=10, sticky="ew")
 
+    root.columnconfigure(1, weight=1) #Make the entry columns expandable
     root.mainloop()
