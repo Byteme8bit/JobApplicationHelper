@@ -3,7 +3,7 @@ from tkinter import filedialog, messagebox
 import json
 import os
 from tkinter import ttk
-from main_dev import generate_document, load_config # Import necessary functions
+from mainDev import generate_document, load_config # Import necessary functions
 
 
 def browse_config_file():
