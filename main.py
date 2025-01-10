@@ -3,6 +3,8 @@ import json
 import os
 from datetime import date
 from docx import Document
+import tkinter as tk
+from tkinter import filedialog, messagebox
 
 
 def generate_document(template_path, output_path, data):
@@ -54,75 +56,127 @@ def load_config(path):
     except FileNotFoundError:
         return {}
 
+def browse_config_file():
+    """Open a file dialog to select the config.json file."""
+    file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+    if file_path:
+        config_path.set(file_path)
+        load_config_file()
+
+def load_config_file():
+    """Load the content of the selected config.json file and populate the corresponding fields."""
+    config_path = config_path.get()
+    if not os.path.exists(config_path):
+        messagebox.showerror("Error", "Config file not found.")
+        return
+    config = load_config(config_path)
+    # Populate fields with config data (this is a placeholder, adjust as needed)
+    template_path.set(config.get("templateFilePath", ""))
+    output_filename.set(config.get("outputFilePath", ""))
+    placeholders.set(json.dumps(config.get("placeholders", {}), indent=4))
+
+def run_gui():
+    # Create the main window
+    root = tk.Tk()
+    root.title("Job Application Helper")
+
+    # Config file path
+    tk.Label(root, text="Config file path:").grid(row=0, column=0, padx=10, pady=10)
+    config_path_var = tk.StringVar()
+    tk.Entry(root, textvariable=config_path_var, width=50).grid(row=0, column=1, padx=10, pady=10)
+    tk.Button(root, text="Browse", command=browse_config_file).grid(row=0, column=2, padx=10, pady=10)
+    tk.Button(root, text="Refresh", command=load_config_file).grid(row=0, column=3, padx=10, pady=10)
+
+    # Template file path
+    tk.Label(root, text="Template file path:").grid(row=1, column=0, padx=10, pady=10)
+    template_path_var = tk.StringVar()
+    tk.Entry(root, textvariable=template_path_var, width=50).grid(row=1, column=1, padx=10, pady=10)
+
+    # Output file path
+    tk.Label(root, text="Output file path:").grid(row=2, column=0, padx=10, pady=10)
+    output_path_var = tk.StringVar()
+    tk.Entry(root, textvariable=output_path_var, width=50).grid(row=2, column=1, padx=10, pady=10)
+
+    # Placeholders
+    tk.Label(root, text="Placeholders:").grid(row=3, column=0, padx=10, pady=10)
+    placeholders_var = tk.StringVar()
+    tk.Entry(root, textvariable=placeholders_var, width=50).grid(row=3, column=1, padx=10, pady=10)
+
+    # Run the main loop
+    root.mainloop()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate documents from templates.")
     parser.add_argument("--config", help="Path to the config file (default: config.json)")
+    parser.add_argument("-GUI", action="store_true", help="Load the GUI")
     args = parser.parse_args()
 
-    config_path = args.config if args.config else input(
-        "Enter the path to the config file (default: config.json): ") or "config.json"
-    print(f"Loading config from {config_path}...")
-    config = load_config(config_path)
+    if args.GUI:
+        run_gui()
+    else:
+        config_path = args.config if args.config else input(
+            "Enter the path to the config file (default: config.json): ") or "config.json"
+        print(f"Loading config from {config_path}...")
+        config = load_config(config_path)
 
-    # Automatically generate date
-    today = date.today().strftime("%Y-%m-%d")
+        # Automatically generate date
+        today = date.today().strftime("%Y-%m-%d")
 
-    while True:
-        template_path = config.get("templateFilePath")
-        if template_path is None:
-            template_path = input("Enter template file path: ")
-        if not os.path.exists(template_path):
-            print("Error: Template file not found. Please enter a valid path.")
-            if template_path is not None:  # Only clear the config value if it was from the file
-                config["template_path"] = None  # Clear incorrect value from config
-            continue  # Ask for input again
-        print(f"Using template file: {template_path}")
-        break
-
-    while True:
-        output_filename = config.get("outputFilePath")
-        if output_filename is None:
-            output_filename = input("Enter output file name: ")
-
-        overwrite = config.get("overwriteOutput")  # Initialize overwrite variable
-        if overwrite is None:
-            overwrite = False
-
-        while os.path.exists(output_filename):
-            overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
-            if overwrite:
-                break  # Exit the loop if user wants to overwrite
-            elif not overwrite:
-                output_filename = input("Enter a different output file name: ")  # Ask for a new name
-                overwrite = None  # Reset overwrite for the new filename check
-            else:
-                print("Invalid input. Please enter 'y' or 'n'.")  # Handle invalid input
-
-        if overwrite and output_filename is not None:
-            break  # Exit the loop if user wants to overwrite
-        else:
-            continue  # Ask for input again if not overwriting
-
-    print(f"Output file will be saved as: {output_filename}")
-
-    placeholders = config.get("placeholders", {})  # Load placeholders from config, default to empty dict
-
-    if not placeholders:  # Only ask for placeholders if data is empty
-        print("No data found in config. Please enter placeholder values.")
         while True:
-            key = input("Enter placeholder name (or type 'done'): ")
-            if key == "done":
-                break
-            value = input(f"Enter value for {key}: ")
-            placeholders[key] = value
+            template_path = config.get("templateFilePath")
+            if template_path is None:
+                template_path = input("Enter template file path: ")
+            if not os.path.exists(template_path):
+                print("Error: Template file not found. Please enter a valid path.")
+                if template_path is not None:  # Only clear the config value if it was from the file
+                    config["template_path"] = None  # Clear incorrect value from config
+                continue  # Ask for input again
+            print(f"Using template file: {template_path}")
+            break
 
-    # Add the automatically generated date to the data dictionary
-    placeholders["date"] = today
+        while True:
+            output_filename = config.get("outputFilePath")
+            if output_filename is None:
+                output_filename = input("Enter output file name: ")
 
-    try:
-        print("Generating document...")
-        generate_document(template_path, output_filename, placeholders)
-        print(f"Document '{output_filename}' generated successfully.")
-    except Exception as e:
-        print(f"Error: {e}")
+            overwrite = config.get("overwriteOutput")  # Initialize overwrite variable
+            if overwrite is None:
+                overwrite = False
+
+            while os.path.exists(output_filename):
+                overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
+                if overwrite:
+                    break  # Exit the loop if user wants to overwrite
+                elif not overwrite:
+                    output_filename = input("Enter a different output file name: ")  # Ask for a new name
+                    overwrite = None  # Reset overwrite for the new filename check
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")  # Handle invalid input
+
+            if overwrite and output_filename is not None:
+                break  # Exit the loop if user wants to overwrite
+            else:
+                continue  # Ask for input again if not overwriting
+
+        print(f"Output file will be saved as: {output_filename}")
+
+        placeholders = config.get("placeholders", {})  # Load placeholders from config, default to empty dict
+
+        if not placeholders:  # Only ask for placeholders if data is empty
+            print("No data found in config. Please enter placeholder values.")
+            while True:
+                key = input("Enter placeholder name (or type 'done'): ")
+                if key == "done":
+                    break
+                value = input(f"Enter value for {key}: ")
+                placeholders[key] = value
+
+        # Add the automatically generated date to the data dictionary
+        placeholders["date"] = today
+
+        try:
+            print("Generating document...")
+            generate_document(template_path, output_filename, placeholders)
+            print(f"Document '{output_filename}' generated successfully.")
+        except Exception as e:
+            print(f"Error: {e}")
