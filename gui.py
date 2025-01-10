@@ -95,13 +95,11 @@ def run_gui():
     output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50) #Increased width
     output_filename_entry.grid(row=2, column=1, columnspan=3, padx=5, pady=5) #Increased columnspan
 
-
     #Placeholders text area
     placeholders_label = ttk.Label(root, text="Placeholders (JSON):")
     placeholders_label.grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
     placeholders_text = tk.Text(root, height=10, width=30)
-    placeholders_text.grid(row=4, column=0, columnspan=4, padx=5, pady=5) #Increased columnspan
-
+    placeholders_text.grid(row=3, column=1, columnspan=4, padx=5, pady=5) #Increased columnspan
 
     #Add placeholder button and entries
     placeholder_label = ttk.Label(root, text="Placeholder:")
@@ -115,7 +113,7 @@ def run_gui():
     replace_with_entry.grid(row=6, column=1, padx=5, pady=5)
 
     add_placeholder_button = ttk.Button(root, text="Add Placeholder", command=add_placeholder)
-    add_placeholder_button.grid(row=5, column=4, rowspan=2, padx=5, pady=5) #rowspan=2
+    add_placeholder_button.grid(row=5, column=2, rowspan=2, padx=5, pady=5) #rowspan=2
 
 
     # Generate button
