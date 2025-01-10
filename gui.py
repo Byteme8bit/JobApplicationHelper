@@ -80,4 +80,3 @@ def run_gui():
     generate_button.grid(row=8, column=2, columnspan=2, pady=10)
 
     root.mainloop()
-

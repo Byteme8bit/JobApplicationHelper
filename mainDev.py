@@ -3,7 +3,7 @@ import json
 import os
 from datetime import date
 from docx import Document
-from gui import run_gui # Import the run_gui function from the gui module
+from gui import load_config_file, browse_config_file, browse_template_file, add_placeholder
 
 def generate_document(template_path, output_path, data):
     """Generates a document, replacing placeholders and resizing text to fit.
@@ -63,6 +63,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.GUI:
+        from run_gui import run_gui
         run_gui() # Call the GUI function from the imported module
     else:
         config_path = args.config if args.config else input(
@@ -131,4 +132,3 @@ if __name__ == "__main__":
             print(f"Document '{output_filename}' generated successfully.")
         except Exception as e:
             print(f"Error: {e}")
-
