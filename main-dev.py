@@ -61,6 +61,7 @@ def browse_config_file():
     """Open a file dialog to select the config.json file."""
     file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
     if file_path:
+        global config_path_var # Declare config_path_var as global
         config_path_var.set(file_path)
         load_config_file()
 
@@ -74,6 +75,7 @@ def browse_template_file():
 
 def load_config_file():
     """Load the content of the selected config.json file and populate the corresponding fields."""
+    global config_path_var # Declare config_path_var as global
     config_path = config_path_var.get()
     if not os.path.exists(config_path):
         messagebox.showerror("Error", "Config file not found.")
@@ -86,6 +88,10 @@ def load_config_file():
 
 
 def run_gui():
+    global config_path_var # Declare config_path_var as global
+    global template_path
+    global output_filename
+    global placeholders
     # Create the main window
     root = tk.Tk()
     root.title("Job Application Helper")
