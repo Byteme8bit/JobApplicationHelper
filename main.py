@@ -2,7 +2,8 @@ import argparse
 import os
 import subprocess
 from datetime import date
-from gui import run_gui
+import json
+from run_gui import run_gui
 from utils import generate_document, load_config, extract_placeholders
 
 
