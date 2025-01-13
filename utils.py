@@ -3,6 +3,7 @@ import os
 from datetime import date
 from docx import Document
 
+
 def generate_document(template_path, output_path, data):
     """Generates a document, replacing placeholders and resizing text to fit.
 
