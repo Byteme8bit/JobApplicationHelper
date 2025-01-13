@@ -7,6 +7,12 @@ from docx import Document
 def generate_document(template_path, output_path, placeholders):
     """Generates a document from a template and placeholders."""
     try:
+        if os.path.exists(output_path):
+            if not config.get("overwriteOutput", False):
+                overwrite = input(f"Output file '{output_path}' already exists. Overwrite? (y/n): ").lower()
+                if overwrite != 'y':
+                    raise FileExistsError(f"Output file '{output_path}' already exists and overwrite is not allowed.")
+
         if template_path.endswith((".docx", ".doc")):
             doc = Document(template_path)
             for paragraph in doc.paragraphs:
@@ -25,6 +31,8 @@ def generate_document(template_path, output_path, placeholders):
 
     except FileNotFoundError:
         raise FileNotFoundError(f"Template file not found: {template_path}")
+    except FileExistsError as e:
+        raise e
     except Exception as e:
         raise IOError(f"An error occurred while generating the document: {e}")
 
