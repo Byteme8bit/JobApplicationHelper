@@ -8,20 +8,44 @@ from utils import generate_document, load_config, extract_placeholders
 
 
 def generate_output(config):
-    if config == dict:
+    """Generates the output document using the provided configuration."""
+    if isinstance(config, dict):
         config = load_config(config.get("configFileName"))
-        try:
-            generate_document(config["templateFilePath"], config["outputFilePath"], config["placeholders"])
-            print("Document generated successfully!")
-        except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-            print(f"Error generating document: {e}")
-    else:
-        config = config
-        try:
-            generate_document(config)
-            print("Document generated successfully!")
-        except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-            print(f"Error generating document: {e}")
+    try:
+        generate_document(config)
+        print("Document generated successfully!")
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
+        print(f"Error generating document: {e}")
+
+
+def handle_external_program(config_filepath, program):
+    """Handles the execution of an external program (e.g., notepad, notepad++, word) and subsequent config loading."""
+    switch = {
+        'notepad': 'notepad.exe',
+        'notepad++': "notepad++.exe",
+        'word': "WINWORD.EXE"
+    }
+    try:
+        result = subprocess.run(
+            [switch.get(program, program), config_filepath], check=True)  # check=True raises exception if program fails
+        if result.returncode == 0:
+            print(f"Program '{program}' finished successfully.")
+            config = load_config(config_filepath)
+            print("Config loaded successfully!")
+            print("Placeholders:")
+            for key, value in config["placeholders"].items():
+                print(f"- {key}: {value}")
+            generate_output(config)
+        else:
+            print(f"Program '{program}' exited with error code {result.returncode}.")
+    except FileNotFoundError:
+        print(f"Error: Program '{program}' not found.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing '{program}': {e}")
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
+        print(f"Error loading or processing config file: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 
 if __name__ == "__main__":
@@ -36,7 +60,7 @@ if __name__ == "__main__":
     if args.GUI:
         run_gui()
     elif args.BUILD:
-        template_path = args.BUILD if not None else input("Enter path to template file: ")
+        template_path = args.BUILD if args.BUILD else input("Enter path to template file: ")
         while not os.path.exists(template_path):
             template_path = input("File not found. Enter valid path to template file: ")
         bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%): ")
@@ -50,40 +74,15 @@ if __name__ == "__main__":
                 "configFileName": config_filename,
                 "templateFilePath": template_path,
                 "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
-                "placeholders": placeholders
+                "placeholders": placeholders,
+                "overwriteOutput": False
             }
             placeholders["Date"] = date
             with open(config_filepath, 'w') as outfile:
                 json.dump(config_data, outfile, indent=4)
 
-            program = input(f"Config file '{config_filepath}' "
-                            f"created. Open it with which program? (e.g., notepad, notepad++, word): ")
-            switch = {
-                'notepad': 'notepad.exe',
-                'notepad++': "notepad++.exe",
-                'word': "WINWORD.EXE"
-            }
-            try:
-                result = subprocess.run(
-                    [switch.get(program, program), config_filepath], check=True)  # check=True raises exception if program fails
-                if result.returncode == 0:
-                    print(f"Program '{program}' finished successfully.")
-                    config = load_config(config_filepath)
-                    print("Config loaded successfully!")
-                    print("Placeholders:")
-                    for key, value in config["placeholders"].items():
-                        print(f"- {key}: {value}")
-                    generate_output(config)
-                else:
-                    print(f"Program '{program}' exited with error code {result.returncode}.")
-            except FileNotFoundError:
-                print(f"Error: Program '{program}' not found.")
-            except subprocess.CalledProcessError as e:
-                print(f"Error executing '{program}': {e}")
-            except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-                print(f"Error loading or processing config file: {e}")
-            except Exception as e:
-                print(f"An unexpected error occurred: {e}")
+            program = input(f"Config file '{config_filepath}' created. Open it with which program? (e.g., notepad, notepad++, word): ")
+            handle_external_program(config_filepath, program)
 
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
@@ -91,7 +90,6 @@ if __name__ == "__main__":
         config_path = input("Enter path to config file: ")
         while not os.path.exists(config_path):
             config_path = input("File not found. Enter valid path to config file: ")
-        config_path = args.config or "config.json"
         try:
             generate_output(config_path)
         except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
