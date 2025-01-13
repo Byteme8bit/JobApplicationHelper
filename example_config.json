@@ -1,6 +1,6 @@
 {
   "templateFilePath": "path/to/your/template.docx",  // Replace with the actual path to your template file (.docx or .txt)
-  "outputFilePath": "path/to/your/output/directory/",  // Replace with the desired output directory.  The file will be saved here.
+  "outputFilePath": "path/to/your/output/directory/output.docx",  // Replace with the desired output file path.
   "overwriteOutput": false, // Set to true to overwrite existing files with the same name.
   "placeholders": {
     "Date": "January 8, 2025", // Replace with the desired date.
