@@ -131,7 +131,7 @@ def run_gui():
     config_path_label = ttk.Label(root, text="Config File Path:")
     config_path_label.grid(row=0, column=labelCol, sticky=tk.W, padx=5, pady=2)
     config_path_entry = ttk.Entry(root, textvariable=config_path, width=50)
-    config_path_entry.grid(row=0, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2)
+    config_path_entry.grid(row=0, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
     config_browse_button = ttk.Button(root, text="Browse", command=browse_config_file)
     config_browse_button.grid(row=0, column=buttonA, columnspan=buttonColumnspan, padx=5, pady=2)
     load_config_button = ttk.Button(root, text="Load Config", command=load_config_file)
@@ -141,7 +141,7 @@ def run_gui():
     template_path_label = ttk.Label(root, text="Template File Path:")
     template_path_label.grid(row=1, column=labelCol, sticky=tk.W, padx=5, pady=2)
     template_path_entry = ttk.Entry(root, textvariable=template_path, width=50)
-    template_path_entry.grid(row=1, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2)
+    template_path_entry.grid(row=1, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
     template_browse_button = ttk.Button(root, text="Browse", command=browse_template_file)
     template_browse_button.grid(row=1, column=buttonA, columnspan=buttonColumnspan, padx=5, pady=2)
 
@@ -149,7 +149,7 @@ def run_gui():
     output_filename_label = ttk.Label(root, text="Output File Name:")
     output_filename_label.grid(row=2, column=labelCol, sticky=tk.W, padx=5, pady=2)
     output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50)
-    output_filename_entry.grid(row=2, column=2, columnspan=2, padx=5, pady=2)
+    output_filename_entry.grid(row=2, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
 
     # Placeholders listbox
     placeholders_label = ttk.Label(root, text="Placeholders:")
@@ -162,12 +162,12 @@ def run_gui():
     placeholder_label = ttk.Label(root, text="Placeholder:")
     placeholder_label.grid(row=4, column=labelCol, sticky=tk.W, padx=5, pady=2)
     placeholder_entry = ttk.Entry(root, textvariable=placeholder_var, width=50)
-    placeholder_entry.grid(row=4, column=2, columnspan=2, padx=5, pady=2)
+    placeholder_entry.grid(row=4, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
 
     replace_with_label = ttk.Label(root, text="Replace With:")
     replace_with_label.grid(row=5, column=labelCol, sticky=tk.W, padx=5, pady=2)
     replace_with_entry = ttk.Entry(root, textvariable=replace_with_var, width=50)
-    replace_with_entry.grid(row=5, column=2, columnspan=2, padx=5, pady=2)
+    replace_with_entry.grid(row=5, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
 
     add_placeholder_button = ttk.Button(root, text="Add", command=add_placeholder)
     add_placeholder_button.grid(row=4, column=buttonA, columnspan=buttonColumnspan, padx=5, pady=2)
@@ -183,7 +183,7 @@ def run_gui():
 
     # Generate button
     generate_button = ttk.Button(root, text="Generate Document", command=generate_document_from_gui)
-    generate_button.grid(row=6, column=labelCol, columnspan=5, pady=10, sticky="ew")
+    generate_button.grid(row=6, column=labelCol, columnspan=10, pady=10, sticky="ew")
 
     root.columnconfigure(textboxCol, weight=1)
     root.mainloop()
