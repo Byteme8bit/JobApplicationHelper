@@ -4,13 +4,20 @@ import re
 from docx import Document
 
 
-def generate_document(template_path, output_path, placeholders):
+def generate_document(config):
     """Generates a document from a template and placeholders."""
+    while not isinstance(config, dict):
+        raise TypeError("Config must be a dictionary.")
+    template_path = config.get("templateFilePath")
+    output_path = config.get("outputFilePath")
+    placeholders = config.get("placeholders")
+
     try:
         if os.path.exists(output_path):
-            if not config.get("overwriteOutput", False):
-                overwrite = input(f"Output file '{output_path}' already exists. Overwrite? (y/n): ").lower()
-                if overwrite != 'y':
+            if not config.get("overwriteOutput", False):  # Expects a boolean value
+                overwrite = input(
+                    f"Output file '{output_path}' already exists. Overwrite? (y/n): ").lower()  # Expects 'y' or 'n'
+                if overwrite != 'y':  # Only overwrite if user enters 'y'
                     raise FileExistsError(f"Output file '{output_path}' already exists and overwrite is not allowed.")
 
         if template_path.endswith((".docx", ".doc")):
@@ -42,10 +49,8 @@ def load_config(config_path):
     try:
         with open(config_path, 'r') as f:
             return json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Config file not found: {config_path}")
-    except json.JSONDecodeError:
-        raise json.JSONDecodeError(f"Invalid JSON format in config file: {config_path}", None, None)
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
+        print(f"Error loading or processing config file: {e}")
     except Exception as e:
         raise IOError(f"An error occurred while loading the config file: {e}")
 

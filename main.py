@@ -9,8 +9,6 @@ from utils import generate_document, load_config, extract_placeholders
 
 def generate_output(config):
     """Generates the output document using the provided configuration."""
-    if isinstance(config, dict):
-        config = load_config(config.get("configFileName"))
     try:
         generate_document(config)
         print("Document generated successfully!")
@@ -27,15 +25,15 @@ def handle_external_program(config_filepath, program):
     }
     try:
         result = subprocess.run(
-            [switch.get(program, program), config_filepath], check=True)  # check=True raises exception if program fails
+            [switch.get(program, program),
+             config_filepath], check=True)  # check=True raises exception if program fails
         if result.returncode == 0:
-            print(f"Program '{program}' finished successfully.")
+            print(f"Config confirmed OK. Loading config from '{config_filepath}'...")
             config = load_config(config_filepath)
-            print("Config loaded successfully!")
+            print(f"Config {config_path} loaded successfully!")
             print("Placeholders:")
             for key, value in config["placeholders"].items():
                 print(f"- {key}: {value}")
-            generate_output(config)
         else:
             print(f"Program '{program}' exited with error code {result.returncode}.")
     except FileNotFoundError:
@@ -56,7 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("-BUILD", help="Build config file from template."
                                        "Enter a path to a template file. (.docx, .doc, or .txt)", nargs='?')
     args = parser.parse_args()
-
+    config_path = args.config if not None else input("Enter path to config file: ")
     if args.GUI:
         run_gui()
     elif args.BUILD:
@@ -81,17 +79,30 @@ if __name__ == "__main__":
             with open(config_filepath, 'w') as outfile:
                 json.dump(config_data, outfile, indent=4)
 
-            program = input(f"Config file '{config_filepath}' created. Open it with which program? (e.g., notepad, notepad++, word): ")
-            handle_external_program(config_filepath, program)
+            print("Config file '{config_filepath}' created.")
 
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
-    elif args.config is None:  # If config is not passed as an argument, prompt for it
-        config_path = input("Enter path to config file: ")
+    elif args.config:  # If config is not passed as an argument, prompt for it
         while not os.path.exists(config_path):
             config_path = input("File not found. Enter valid path to config file: ")
-        try:
-            generate_output(config_path)
-        except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-            print(f"Error: {e}")
+    else:
+        print("No arguments provided. Use -h for help.")
 
+    abspath = os.path.abspath(config_path)
+    while not os.path.exists(abspath):
+        abspath = input("File not found. Enter valid path to config file: ")
+        if not abspath.endswith(".json"):
+            raise ValueError("Invalid file type. Please provide a JSON file.")
+        elif not load_config(abspath):
+            raise json.JSONDecodeError(f"Invalid JSON format in config file: {abspath}", abspath, 0)
+        else:
+            break
+    openConfig = input("Open config file with external program? (y/n): ")
+    if openConfig == 'y':
+        program = input(f"Open '{abspath}' with which program? (e.g., notepad, notepad++, word): ")
+        handle_external_program(abspath, program)
+    else:
+        config = load_config(config_path)
+        generate_document(config)
+        print("Document generated successfully!")
