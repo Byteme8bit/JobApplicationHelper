@@ -25,8 +25,10 @@ if __name__ == "__main__":
             config_filename = '-'.join(filename_parts[:2]) + "-config.json"
             config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
 
+            #Corrected JSON output
+            config_data = {"placeholders": placeholders}
             with open(config_filepath, 'w') as outfile:
-                json.dump({"placeholders": placeholders}, outfile, indent=4)
+                json.dump(config_data, outfile, indent=4)
 
             open_file = input(f"Config file '{config_filepath}' created. Open it? (y/n): ").lower()
             if open_file == 'y':
