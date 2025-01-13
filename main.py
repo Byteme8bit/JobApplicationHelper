@@ -41,5 +41,11 @@ if __name__ == "__main__":
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
     else:
-        # ... (Existing code for non-BUILD mode remains unchanged) ...
+        config_path = args.config or "config.json"
+        try:
+            config = load_config(config_path)
+            generate_document(config["templateFilePath"], config["outputFilePath"], config["placeholders"])
+            print("Document generated successfully!")
+        except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
+            print(f"Error: {e}")
 
