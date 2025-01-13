@@ -36,6 +36,7 @@ def load_config_file():
     for key, value in placeholders.items():
         listbox.insert(tk.END, f"{key}: {value}")
 
+
 def generate_document_from_gui():
     template_path_val = template_path.get()
     output_filename_val = output_filename.get()
@@ -53,6 +54,7 @@ def generate_document_from_gui():
         messagebox.showerror("Error", "Invalid JSON format in placeholders.")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {e}")
+
 
 def add_placeholder():
     placeholder = placeholder_var.get()
@@ -74,6 +76,7 @@ def add_placeholder():
     else:
         messagebox.showerror("Error", "Both fields must be filled out.")
 
+
 def edit_placeholder(event):
     try:
         selected_index = listbox.curselection()[0]
@@ -85,6 +88,7 @@ def edit_placeholder(event):
     except (IndexError, ValueError):
         messagebox.showerror("Error", "Invalid item selected.")
 
+
 def remove_placeholder():
     try:
         selected_index = listbox.curselection()[0]
@@ -93,6 +97,7 @@ def remove_placeholder():
         replace_with_var.set("")
     except IndexError:
         messagebox.showerror("Error", "No item selected.")
+
 
 def insert_placeholder():
     placeholder = placeholder_var.get()
@@ -107,6 +112,7 @@ def insert_placeholder():
             messagebox.showerror("Error", "No item selected.")
     else:
         messagebox.showerror("Error", "Both fields must be filled out.")
+
 
 def run_gui():
     global config_path, template_path, output_filename, placeholder_var, replace_with_var, listbox
