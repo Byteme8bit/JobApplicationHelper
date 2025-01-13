@@ -6,10 +6,10 @@ import json
 from run_gui import run_gui
 from utils import generate_document, load_config, extract_placeholders
 
-
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate documents from templates.")
-    parser.add_argument("--config", help="Path to the config file (default: config.json)")
+    parser = argparse.ArgumentParser(description="Generate documents from templates.", prog="Document Generator",
+                                     usage="%(prog)s [options]")
+    parser.add_argument("--config", help="Path to the config file", nargs='?')
     parser.add_argument("-GUI", action="store_true", help="Load the GUI")
     parser.add_argument("-BUILD", help="Build config file from template", nargs='?')
     args = parser.parse_args()
@@ -18,23 +18,39 @@ if __name__ == "__main__":
         run_gui()
     elif args.BUILD:
         template_path = args.BUILD or input("Enter path to template file: ")
-        bookends = input("Enter placeholder bookends (e.g., %%): ")
+        while not os.path.exists(template_path):
+            template_path = input("File not found. Enter valid path to template file: ")
+        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%): ")
         try:
             placeholders = extract_placeholders(template_path, bookends)
             filename_parts = os.path.basename(template_path).split('-')
             config_filename = '-'.join(filename_parts[:2]) + "-config.json"
             config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
-
-            #Corrected JSON output
-            config_data = {"placeholders": placeholders}
+            date = date.today().strftime("%Y-%m-%d")
+            config_data = {
+                "configFileName": config_filename,
+                "templateFilePath": template_path,
+                "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
+                "placeholders": placeholders
+            }
+            placeholders["Date"] = date
             with open(config_filepath, 'w') as outfile:
                 json.dump(config_data, outfile, indent=4)
 
             open_file = input(f"Config file '{config_filepath}' created. Open it? (y/n): ").lower()
             if open_file == 'y':
-                program = input("Enter the program to open the file with (e.g., notepad, notepad++, word): ")
+                program = input("Enter the program to open the file with (e.g., notepad, "
+                                "notepad++ (Not working), "
+                                "word (Not working): ")
                 try:
-                    subprocess.run([program, config_filepath])
+                    switch = {
+                        'notepad': 'notepad.exe',
+                        'notepad++': "notepad++.exe",  # Not working at the moment. "Program 'notepad++' not found."
+                        'word': "WINWORD.EXE"  # Not working at the moment. "Program 'word' not found."
+                    }
+
+                    subprocess.run([switch[program], config_filepath])
+
                 except FileNotFoundError:
                     print(f"Error: Program '{program}' not found.")
                 except Exception as e:
@@ -42,7 +58,7 @@ if __name__ == "__main__":
 
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
-    else:
+    elif args.config:
         config_path = args.config or "config.json"
         try:
             config = load_config(config_path)
@@ -50,4 +66,3 @@ if __name__ == "__main__":
             print("Document generated successfully!")
         except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
             print(f"Error: {e}")
-
