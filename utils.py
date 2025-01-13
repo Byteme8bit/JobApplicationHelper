@@ -2,7 +2,7 @@ import json
 import os
 import re
 from docx import Document
-from docx.shared import Inches
+
 
 def generate_document(template_path, output_path, placeholders):
     """Generates a document from a template and placeholders."""
@@ -69,4 +69,3 @@ def extract_placeholders(template_path, bookends):
         raise FileNotFoundError(f"Template file not found: {template_path}")
     except Exception as e:
         raise IOError(f"An error occurred while extracting placeholders: {e}")
-
