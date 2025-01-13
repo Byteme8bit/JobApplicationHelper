@@ -7,36 +7,6 @@ from run_gui import run_gui
 from utils import generate_document, load_config, extract_placeholders
 
 
-def handle_external_program(program, filepath):
-    """Handles execution of an external program and subsequent actions."""
-    try:
-        switch = {
-            'notepad': 'notepad.exe',
-            'notepad++': "notepad++.exe",
-            'word': "WINWORD.EXE"
-        }
-        result = subprocess.run(
-            [switch.get(program, program), filepath], check=True)  # check=True raises exception if program fails
-        if result.returncode == 0:
-            print(f"Program '{program}' finished successfully.")
-            config = load_config(filepath)
-            print("Config loaded successfully!")
-            print("Placeholders:")
-            for key, value in config["placeholders"].items():
-                print(f"- {key}: {value}")
-            generate_output(config)
-        else:
-            print(f"Program '{program}' exited with error code {result.returncode}.")
-    except FileNotFoundError:
-        print(f"Error: Program '{program}' not found.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing '{program}': {e}")
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-        print(f"Error loading or processing config file: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-
 def generate_output(config):
     if config == dict:
         config = load_config(config.get("configFileName"))
@@ -88,7 +58,32 @@ if __name__ == "__main__":
 
             program = input(f"Config file '{config_filepath}' "
                             f"created. Open it with which program? (e.g., notepad, notepad++, word): ")
-            handle_external_program(program, config_filepath)
+            switch = {
+                'notepad': 'notepad.exe',
+                'notepad++': "notepad++.exe",
+                'word': "WINWORD.EXE"
+            }
+            try:
+                result = subprocess.run(
+                    [switch.get(program, program), config_filepath], check=True)  # check=True raises exception if program fails
+                if result.returncode == 0:
+                    print(f"Program '{program}' finished successfully.")
+                    config = load_config(config_filepath)
+                    print("Config loaded successfully!")
+                    print("Placeholders:")
+                    for key, value in config["placeholders"].items():
+                        print(f"- {key}: {value}")
+                    generate_output(config)
+                else:
+                    print(f"Program '{program}' exited with error code {result.returncode}.")
+            except FileNotFoundError:
+                print(f"Error: Program '{program}' not found.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error executing '{program}': {e}")
+            except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
+                print(f"Error loading or processing config file: {e}")
+            except Exception as e:
+                print(f"An unexpected error occurred: {e}")
 
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
