@@ -1,8 +1,9 @@
 import argparse
+import json
 import os
 from datetime import date
-from gui import run_gui
-from utils import generate_document, load_config
+from gui import run_gui #Import run_gui function
+from utils import generate_document, load_config #Import functions from utils
 
 
 if __name__ == "__main__":

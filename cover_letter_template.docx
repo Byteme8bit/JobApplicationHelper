@@ -1,0 +1,8 @@
+%templateFilePath%
+%outputFilePath%
+%overwriteOutput%
+%placeholders%
+%CompanyName%
+%TheirAddress%
+%PositionName%
+%JobBoard%
