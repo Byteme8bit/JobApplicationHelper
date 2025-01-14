@@ -1,49 +1,9 @@
 import argparse
 import os
-import subprocess
 from datetime import date
 import json
 from run_gui import run_gui
-from utils import generate_document, load_config, extract_placeholders
-
-
-def generate_output(config):
-    """Generates the output document using the provided configuration."""
-    try:
-        generate_document(config)
-        print("Document generated successfully!")
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-        print(f"Error generating document: {e}")
-
-
-def handle_external_program(config_filepath, program):
-    """Handles the execution of an external program (e.g., notepad, notepad++, word) and subsequent config loading."""
-    switch = {
-        'notepad': 'notepad.exe',
-        'notepad++': "notepad++.exe",
-        'word': "WINWORD.EXE"
-    }
-    try:
-        result = subprocess.run(
-            [switch.get(program, program),
-             config_filepath], check=True)  # check=True raises exception if program fails
-        if result.returncode == 0:
-            print(f"Config confirmed OK. Loading config from '{config_filepath}'...")
-            config = load_config(config_filepath)
-            print(f"Config {config_path} loaded successfully!")
-            print("Placeholders:")
-            for key, value in config["placeholders"].items():
-                print(f"- {key}: {value}")
-        else:
-            print(f"Program '{program}' exited with error code {result.returncode}.")
-    except FileNotFoundError:
-        print(f"Error: Program '{program}' not found.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing '{program}': {e}")
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-        print(f"Error loading or processing config file: {e}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+from utils import generate_document, load_config, extract_placeholders, handle_external_program
 
 
 if __name__ == "__main__":
@@ -55,54 +15,60 @@ if __name__ == "__main__":
                                        "Enter a path to a template file. (.docx, .doc, or .txt)", nargs='?')
     args = parser.parse_args()
     config_path = args.config if not None else input("Enter path to config file: ")
+
     if args.GUI:
         run_gui()
+
     elif args.BUILD:
         template_path = args.BUILD if args.BUILD else input("Enter path to template file: ")
         while not os.path.exists(template_path):
             template_path = input("File not found. Enter valid path to template file: ")
-        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%): ")
+        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
         try:
-            placeholders = extract_placeholders(template_path, bookends)
             filename_parts = os.path.basename(template_path).split('-')
             config_filename = '-'.join(filename_parts[:2]) + "-config.json"
             config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
             date = date.today().strftime("%Y-%m-%d")
+            placeholders = extract_placeholders(template_path, bookends)
             config_data = {
                 "configFileName": config_filename,
                 "templateFilePath": template_path,
                 "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
-                "placeholders": placeholders,
-                "overwriteOutput": False
+                "overwriteOutput": False,
+                "bookends": bookends,
+                "placeholders": placeholders
             }
             placeholders["Date"] = date
             with open(config_filepath, 'w') as outfile:
                 json.dump(config_data, outfile, indent=4)
-
-            print("Config file '{config_filepath}' created.")
-
+            print(f"Config file '{config_filepath}' created.")
+            print("Placeholders:")
+            for key, value in placeholders.items():
+                print(f"- {key}: {value}")
+            # config = load_config(config_filepath)
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
     elif args.config:  # If config is not passed as an argument, prompt for it
-        while not os.path.exists(config_path):
-            config_path = input("File not found. Enter valid path to config file: ")
+        print(f"Config provided. File: {config_path}")
+
     else:
         print("No arguments provided. Use -h for help.")
+        exit(1)
 
-    abspath = os.path.abspath(config_path)
-    while not os.path.exists(abspath):
-        abspath = input("File not found. Enter valid path to config file: ")
-        if not abspath.endswith(".json"):
-            raise ValueError("Invalid file type. Please provide a JSON file.")
-        elif not load_config(abspath):
-            raise json.JSONDecodeError(f"Invalid JSON format in config file: {abspath}", abspath, 0)
-        else:
-            break
-    openConfig = input("Open config file with external program? (y/n): ")
+    #config_path = args.config if not None else input("Enter path to config file: ")
+    config = load_config(config_path)
+    openConfig = input(f"Open {config_path} with external program? (y/n): ")
     if openConfig == 'y':
-        program = input(f"Open '{abspath}' with which program? (e.g., notepad, notepad++, word): ")
-        handle_external_program(abspath, program)
-    else:
-        config = load_config(config_path)
-        generate_document(config)
-        print("Document generated successfully!")
+        program = input(f"Open '{config_path}' with which program? (e.g., notepad, notepad++, word): ")
+        handle_external_program(config_path, program)
+    try:
+        bookends = config_path["bookends"]
+    except KeyError:
+        bookends = None
+    if bookends is None:
+        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
+    generate_document(config, bookend=bookends)
+    print("Document generated successfully!")
