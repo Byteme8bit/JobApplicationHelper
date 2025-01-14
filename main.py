@@ -1,83 +1,103 @@
 import argparse
 import os
 from datetime import date
-from gui import run_gui
-from utils import generate_document, load_config
+import json
+from run_gui import run_gui
+from utils import generate_document, load_config, extract_placeholders, handle_external_program
 
 
 if __name__ == "__main__":
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Generate documents from templates.")
-    parser.add_argument("--config", help="Path to the config file (default: config.json)")
+    parser = argparse.ArgumentParser(description="Generate documents from templates.", prog="Document Generator",
+                                     usage="%(prog)s [options]")
+    parser.add_argument("--config", help="Path to the config file")
     parser.add_argument("-GUI", action="store_true", help="Load the GUI")
+    parser.add_argument("-BUILD", help="Build config file from template."
+                                       "Enter a path to a template file. (.docx, .doc, or .txt)", nargs='?')
     args = parser.parse_args()
+    config_path = args.config if not None else input("Enter path to config file: ")
 
     if args.GUI:
-        run_gui() # Call the GUI function from the imported module
-    else:
-        config_path = args.config if args.config else input(
-            "Enter the path to the config file (default: config.json): ") or "config.json"
-        print(f"Loading config from {config_path}...")
-        config = load_config(config_path)
+        run_gui()
 
-        # Automatically generate date
-        today = date.today().strftime("%Y-%m-%d")
-
-        while True:
-            template_path = config.get("templateFilePath")
-            if template_path is None:
-                template_path = input("Enter template file path: ")
-            if not os.path.exists(template_path):
-                print("Error: Template file not found. Please enter a valid path.")
-                if template_path is not None:  # Only clear the config value if it was from the file
-                    config["template_path"] = None  # Clear incorrect value from config
-                continue  # Ask for input again
-            print(f"Using template file: {template_path}")
-            break
-
-        while True:
-            output_filename = config.get("outputFilePath")
-            if output_filename is None:
-                output_filename = input("Enter output file name: ")
-
-            overwrite = config.get("overwriteOutput")  # Initialize overwrite variable
-            if overwrite is None:
-                overwrite = False
-
-            while os.path.exists(output_filename):
-                overwrite = input(f"File '{output_filename}' already exists. Overwrite? (y/n): ")
-                if overwrite:
-                    break  # Exit the loop if user wants to overwrite
-                elif not overwrite:
-                    output_filename = input("Enter a different output file name: ")  # Ask for a new name
-                    overwrite = None  # Reset overwrite for the new filename check
-                else:
-                    print("Invalid input. Please enter 'y' or 'n'.")  # Handle invalid input
-
-            if overwrite and output_filename is not None:
-                break  # Exit the loop if user wants to overwrite
-            else:
-                continue  # Ask for input again if not overwriting
-
-        print(f"Output file will be saved as: {output_filename}")
-
-        placeholders = config.get("placeholders", {})  # Load placeholders from config, default to empty dict
-
-        if not placeholders:  # Only ask for placeholders if data is empty
-            print("No data found in config. Please enter placeholder values.")
-            while True:
-                key = input("Enter placeholder name (or type 'done'): ")
-                if key == "done":
-                    break
-                value = input(f"Enter value for {key}: ")
-                placeholders[key] = value
-
-        # Add the automatically generated date to the data dictionary
-        placeholders["date"] = today
-
+    elif args.BUILD:
+        template_path = args.BUILD if args.BUILD else input("Enter path to template file: ")
+        while not os.path.exists(template_path):
+            template_path = input("File not found. Enter valid path to template file: ")
+        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
         try:
-            print("Generating document...")
-            generate_document(template_path, output_filename, placeholders)
-            print(f"Document '{output_filename}' generated successfully.")
-        except Exception as e:
+            filename_parts = os.path.basename(template_path).split('-')
+            config_filename = '-'.join(filename_parts[:2]) + "-config.json"
+            config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
+            date = date.today().strftime("%Y-%m-%d")
+            placeholders = extract_placeholders(template_path, bookends)
+            config_data = {
+                "configFileName": config_filename,
+                "templateFilePath": template_path,
+                "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
+                "overwriteOutput": False,
+                "bookends": bookends,
+                "placeholders": placeholders
+            }
+            placeholders["Date"] = date
+            with open(config_filepath, 'w') as outfile:
+                json.dump(config_data, outfile, indent=4)
+            print(f"Config file '{config_filepath}' created.")
+            print("Placeholders:")
+            for key, value in placeholders.items():
+                print(f"- {key}: {value}")
+            config = load_config(config_filepath)
+        except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+
+    elif args.config:  # If config is not passed as an argument, prompt for it
+        print(f"Config provided. File: {config_path}")
+        config = load_config(config_path)
+        try:
+            bookends = config["bookends"]
+        except KeyError or TypeError or ValueError:
+            bookends = None
+        placeholders = config["placeholders"]
+    else:
+        print("No arguments provided. Use -h for help.")
+        exit(1)
+    proceed = False
+    openConfig = input(f"Open {config_path if config_path else config_filepath} with external program? (y/n): ")
+    if openConfig == 'y':
+        program = input(f"Open '{config_path if config_path else config_filepath}' "
+                        f"with which program? (e.g., notepad, notepad++, word): ")
+        config = handle_external_program(config_path if config_path else config_filepath, program)
+
+    else:
+        config = load_config(config_path if config_path else config_filepath)
+
+    placeholders = config["placeholders"]
+
+    while not proceed:
+        print(f"Config file: {config_path if config_path else config_filepath}")
+        print("Placeholders:")
+        for key, value in placeholders.items():
+            print(f"- {key}: {value}")
+        while bookends is None:
+            bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
+        while config is None:
+            config = load_config(config_path if config_path else config_filepath)
+        proceed = input("OK to proceed to generate document? (y / n): ").lower()
+        if proceed == 'y':
+            break
+        elif proceed == 'n':
+            openConfig = input(f"Open {config_path if config_path else config_filepath} with external program? (y/n): ")
+            if openConfig == 'y':
+                program = input(f"Open '{config_path if config_path else config_filepath}' "
+                                f"with which program? (e.g., notepad, notepad++, word): ")
+                config = handle_external_program(config_path if config_path else config_filepath, program)
+            else:
+                config = load_config(config_path if config_path else config_filepath)
+            placeholders = config["placeholders"]
+            continue
+        else:
+            print("Please enter a valid option y or n\n")
+    #config = load_config(config_path if config_path else config_filepath)
+    generate_document(config, bookend=bookends)
+    print("Document generated successfully!")

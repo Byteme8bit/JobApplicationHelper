@@ -171,8 +171,8 @@ cython_debug/
 .pypirc
 .aider.*
 config.json
-
 .idea/
-
 .venv2/
 .aider*
+mainDev.py
+

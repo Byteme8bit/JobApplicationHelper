@@ -1,16 +1,16 @@
 {
-  "templateFilePath": "path/to/your/cover_letter_template.docx",
-  "outputFilePath": "path/to/your/output/directory/",
-  "overwriteOutput": false,
+  "templateFilePath": "path/to/your/template.docx",  // Replace with the actual path to your template file (.docx or .txt)
+  "outputFilePath": "path/to/your/output/directory/output.docx",  // Replace with the desired output file path.
+  "overwriteOutput": false, // Set to true to overwrite existing files with the same name.
   "placeholders": {
-    "Date": "January 8, 2025",
-    "CompanyName": "",
-    "TheirAddress": "",
-    "PositionName": "",
-    "JobBoard": "",
-    "RelatedSentence1": "I have been closely following [CompanyName]'s work in [industry/field] and I am particularly impressed with [specific achievement or project].",
-    "DynamicAIContentRelatingMeToCompany": "This will be dynamically generated based on the company and my skills.",
-    "RelatedSentence2": "My experience in [relevant skill 1] and [relevant skill 2] aligns perfectly with the requirements of this role.",
-    "RelatedSentence3": "I am confident that I can make a significant contribution to [CompanyName]'s continued success."
+    "Date": "January 8, 2025", // Replace with the desired date.
+    "CompanyName": "", // Replace with the company name.
+    "TheirAddress": "", // Replace with the company address.
+    "PositionName": "", // Replace with the position name.
+    "JobBoard": "", // Replace with the job board where you found the job posting.
+    "RelatedSentence1": "I have been closely following [CompanyName]'s work in [industry/field] and I am particularly impressed with [specific achievement or project].", // Customize this sentence as needed.
+    "DynamicAIContentRelatingMeToCompany": "This will be dynamically generated based on the company and my skills.", // This will be populated by AI.
+    "RelatedSentence2": "My experience in [relevant skill 1] and [relevant skill 2] aligns perfectly with the requirements of this role.", // Customize this sentence as needed.
+    "RelatedSentence3": "I am confident that I can make a significant contribution to [CompanyName]'s continued success." // Customize this sentence as needed.
   }
 }
