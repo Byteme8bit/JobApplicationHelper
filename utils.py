@@ -18,7 +18,6 @@ def handle_external_program(config_filepath, program):
              config_filepath], check=True)  # check=True raises exception if program fails
         if result.returncode == 0:
             print(f"Config confirmed OK. Loading config from '{config_filepath}'...")
-            print(f"Config loaded successfully!")
         else:
             print(f"Program '{program}' exited with error code {result.returncode}.")
     except FileNotFoundError:
@@ -29,6 +28,7 @@ def handle_external_program(config_filepath, program):
         print(f"Error loading or processing config file: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+    return load_config(config_filepath)
 
 
 def generate_document(config, bookend="%"):

@@ -9,7 +9,7 @@ from utils import generate_document, load_config, extract_placeholders, handle_e
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate documents from templates.", prog="Document Generator",
                                      usage="%(prog)s [options]")
-    parser.add_argument("--config", help="Path to the config file", nargs='?')
+    parser.add_argument("--config", help="Path to the config file")
     parser.add_argument("-GUI", action="store_true", help="Load the GUI")
     parser.add_argument("-BUILD", help="Build config file from template."
                                        "Enter a path to a template file. (.docx, .doc, or .txt)", nargs='?')
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             print("Placeholders:")
             for key, value in placeholders.items():
                 print(f"- {key}: {value}")
-            # config = load_config(config_filepath)
+            config = load_config(config_filepath)
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
         except Exception as e:
@@ -53,22 +53,51 @@ if __name__ == "__main__":
 
     elif args.config:  # If config is not passed as an argument, prompt for it
         print(f"Config provided. File: {config_path}")
-
+        config = load_config(config_path)
+        try:
+            bookends = config["bookends"]
+        except KeyError or TypeError or ValueError:
+            bookends = None
+        placeholders = config["placeholders"]
     else:
         print("No arguments provided. Use -h for help.")
         exit(1)
-
-    #config_path = args.config if not None else input("Enter path to config file: ")
-    config = load_config(config_path)
-    openConfig = input(f"Open {config_path} with external program? (y/n): ")
+    proceed = False
+    openConfig = input(f"Open {config_path if config_path else config_filepath} with external program? (y/n): ")
     if openConfig == 'y':
-        program = input(f"Open '{config_path}' with which program? (e.g., notepad, notepad++, word): ")
-        handle_external_program(config_path, program)
-    try:
-        bookends = config_path["bookends"]
-    except KeyError:
-        bookends = None
-    if bookends is None:
-        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
+        program = input(f"Open '{config_path if config_path else config_filepath}' "
+                        f"with which program? (e.g., notepad, notepad++, word): ")
+        config = handle_external_program(config_path if config_path else config_filepath, program)
+
+    else:
+        config = load_config(config_path if config_path else config_filepath)
+
+    placeholders = config["placeholders"]
+
+    while not proceed:
+        print(f"Config file: {config_path if config_path else config_filepath}")
+        print("Placeholders:")
+        for key, value in placeholders.items():
+            print(f"- {key}: {value}")
+        while bookends is None:
+            bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
+        while config is None:
+            config = load_config(config_path if config_path else config_filepath)
+        proceed = input("OK to proceed to generate document? (y / n): ").lower()
+        if proceed == 'y':
+            break
+        elif proceed == 'n':
+            openConfig = input(f"Open {config_path if config_path else config_filepath} with external program? (y/n): ")
+            if openConfig == 'y':
+                program = input(f"Open '{config_path if config_path else config_filepath}' "
+                                f"with which program? (e.g., notepad, notepad++, word): ")
+                config = handle_external_program(config_path if config_path else config_filepath, program)
+            else:
+                config = load_config(config_path if config_path else config_filepath)
+            placeholders = config["placeholders"]
+            continue
+        else:
+            print("Please enter a valid option y or n\n")
+    #config = load_config(config_path if config_path else config_filepath)
     generate_document(config, bookend=bookends)
     print("Document generated successfully!")
