@@ -1,13 +1,41 @@
 import json
 import os
 import re
+import subprocess
 from docx import Document
 
 
-def generate_document(config):
+def handle_external_program(config_filepath, program):
+    """Handles the execution of an external program (e.g., notepad, notepad++, word)."""
+    switch = {
+        'notepad': 'notepad.exe',
+        'notepad++': "notepad++.exe",
+        'word': "WINWORD.EXE"
+    }
+    try:
+        result = subprocess.run(
+            [switch.get(program, program),
+             config_filepath], check=True)  # check=True raises exception if program fails
+        if result.returncode == 0:
+            print(f"Config confirmed OK. Loading config from '{config_filepath}'...")
+            print(f"Config loaded successfully!")
+        else:
+            print(f"Program '{program}' exited with error code {result.returncode}.")
+    except FileNotFoundError:
+        print(f"Error: Program '{program}' not found.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing '{program}': {e}")
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
+        print(f"Error loading or processing config file: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+
+def generate_document(config, bookend="%"):
     """Generates a document from a template and placeholders."""
     while not isinstance(config, dict):
         raise TypeError("Config must be a dictionary.")
+
     template_path = config.get("templateFilePath")
     output_path = config.get("outputFilePath")
     placeholders = config.get("placeholders")
@@ -24,13 +52,13 @@ def generate_document(config):
             doc = Document(template_path)
             for paragraph in doc.paragraphs:
                 for placeholder, value in placeholders.items():
-                    paragraph.text = paragraph.text.replace(f"%%{placeholder}%%", value)
+                    paragraph.text = paragraph.text.replace(f"{bookend}{placeholder}{bookend}", value)
             doc.save(output_path)
         elif template_path.endswith(".txt"):
             with open(template_path, 'r', encoding='utf-8') as f:
                 template_content = f.read()
             for placeholder, value in placeholders.items():
-                template_content = template_content.replace(f"%%{placeholder}%%", value)
+                template_content = template_content.replace(f"{placeholder}", value)
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(template_content)
         else:
