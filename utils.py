@@ -7,45 +7,35 @@ from docx import Document
 
 def handle_external_program(config_filepath, program):
     """Handles the execution of an external program (e.g., notepad, notepad++, word)."""
-    switch = {
-        'notepad': 'notepad.exe',
-        'notepad++': "notepad++.exe",
-        'word': "WINWORD.EXE"
-    }
     try:
-        result = subprocess.run(
-            [switch.get(program, program),
-             config_filepath], check=True)  # check=True raises exception if program fails
-        if result.returncode == 0:
-            print(f"Config confirmed OK. Loading config from '{config_filepath}'...")
-        else:
-            print(f"Program '{program}' exited with error code {result.returncode}.")
+        # Use os.startfile for better cross-platform compatibility
+        os.startfile(config_filepath)  
+        input("Press Enter after reviewing the config file...") #Pause execution until user is ready
+        return load_config(config_filepath)
+
     except FileNotFoundError:
-        print(f"Error: Program '{program}' not found.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing '{program}': {e}")
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
-        print(f"Error loading or processing config file: {e}")
+        print(f"Error: Config file '{config_filepath}' or program '{program}' not found.")
+        return None #Return None to indicate failure
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-    return load_config(config_filepath)
+        return None #Return None to indicate failure
 
 
 def generate_document(config, bookend="%"):
     """Generates a document from a template and placeholders."""
-    while not isinstance(config, dict):
+    if not isinstance(config, dict):
         raise TypeError("Config must be a dictionary.")
 
     template_path = config.get("templateFilePath")
     output_path = config.get("outputFilePath")
-    placeholders = config.get("placeholders")
+    placeholders = config.get("placeholders", {}) #Handle missing placeholders gracefully
 
     try:
         if os.path.exists(output_path):
-            if not config.get("overwriteOutput", False):  # Expects a boolean value
+            if not config.get("overwriteOutput", False):
                 overwrite = input(
-                    f"Output file '{output_path}' already exists. Overwrite? (y/n): ").lower()  # Expects 'y' or 'n'
-                if overwrite != 'y':  # Only overwrite if user enters 'y'
+                    f"Output file '{output_path}' already exists. Overwrite? (y/n): ").lower()
+                if overwrite != 'y':
                     raise FileExistsError(f"Output file '{output_path}' already exists and overwrite is not allowed.")
 
         if template_path.endswith((".docx", ".doc")):
@@ -58,7 +48,7 @@ def generate_document(config, bookend="%"):
             with open(template_path, 'r', encoding='utf-8') as f:
                 template_content = f.read()
             for placeholder, value in placeholders.items():
-                template_content = template_content.replace(f"{placeholder}", value)
+                template_content = template_content.replace(f"{bookend}{placeholder}{bookend}", value)
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(template_content)
         else:
@@ -79,6 +69,7 @@ def load_config(config_path):
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
         print(f"Error loading or processing config file: {e}")
+        return None #Return None to indicate failure
     except Exception as e:
         raise IOError(f"An error occurred while loading the config file: {e}")
 
@@ -110,3 +101,4 @@ def extract_placeholders(template_path, bookends):
         raise FileNotFoundError(f"Template file not found: {template_path}")
     except Exception as e:
         raise IOError(f"An error occurred while extracting placeholders: {e}")
+
