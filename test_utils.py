@@ -1,5 +1,6 @@
 import unittest
 import os
+import json #Import added here
 from utils import build_config_from_template, extract_placeholders
 from docx import Document
 import tempfile
