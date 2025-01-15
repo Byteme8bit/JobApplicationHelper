@@ -1,15 +1,15 @@
 import json
 import os
 import re
-import subprocess
 from docx import Document
+from datetime import date
 
 
 def open_config(config_filepath):
     """Opens the config file in default application native to OS"""
     try:
         # Use os.startfile for better cross-platform compatibility
-        os.startfile(config_filepath)  
+        os.startfile(config_filepath)
         input("Press Enter after reviewing the config file...")  # Pause execution until user is ready
         return load_config(config_filepath)
 
@@ -36,7 +36,8 @@ def generate_document(config, bookend="%"):
                 overwrite = input(
                     f"Output file '{output_path}' already exists. Overwrite? (y/n): ").lower()
                 if overwrite != 'y':
-                    raise FileExistsError(f"Output file '{output_path}' already exists and overwrite is not allowed.")
+                    raise FileExistsError(
+                        f"Output file '{output_path}' already exists and overwrite is not allowed.")
 
         if template_path.endswith((".docx", ".doc")):
             doc = Document(template_path)
@@ -101,4 +102,36 @@ def extract_placeholders(template_path, bookends):
         raise FileNotFoundError(f"Template file not found: {template_path}")
     except Exception as e:
         raise IOError(f"An error occurred while extracting placeholders: {e}")
+
+
+def build_config_from_template(template_path, bookends="%"):
+    """Builds a config file from a template file."""
+    try:
+        if not os.path.exists(template_path):
+            raise FileNotFoundError(f"Template file not found: {template_path}")
+
+        filename_parts = os.path.basename(template_path).split('-')
+        config_filename = '-'.join(filename_parts[:2]) + "-config.json"
+        config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
+        date = date.today().strftime("%Y-%m-%d")
+        placeholders = extract_placeholders(template_path, bookends)
+        config_data = {
+            "configFileName": config_filename,
+            "templateFilePath": template_path,
+            "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
+            "overwriteOutput": False,
+            "bookends": bookends,
+            "placeholders": placeholders
+        }
+        placeholders["Date"] = date
+        with open(config_filepath, 'w') as outfile:
+            json.dump(config_data, outfile, indent=4)
+        return config_filepath
+
+    except (FileNotFoundError, ValueError, IOError) as e:
+        print(f"Error building config file: {e}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None
 
