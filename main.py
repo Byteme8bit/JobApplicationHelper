@@ -14,16 +14,23 @@ if __name__ == "__main__":
     parser.add_argument("-BUILD", help="Build config file from template."
                                        "Enter a path to a template file. (.docx, .doc, or .txt)", nargs='?')
     args = parser.parse_args()
-    config_path = args.config if not None else input("Enter path to config file: ")
 
     if args.GUI:
         run_gui()
+        exit(0) #Exit after GUI is launched
 
-    elif args.BUILD:
+    config_path = args.config
+    if config_path is None:
+        config_path = input("Enter path to config file: ")
+        while not os.path.exists(config_path):
+            config_path = input("File not found. Enter valid path to config file: ")
+
+
+    if args.BUILD:
         template_path = args.BUILD if args.BUILD else input("Enter path to template file: ")
         while not os.path.exists(template_path):
             template_path = input("File not found. Enter valid path to template file: ")
-        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
+        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ") or "%"
         try:
             filename_parts = os.path.basename(template_path).split('-')
             config_filename = '-'.join(filename_parts[:2]) + "-config.json"
@@ -48,56 +55,56 @@ if __name__ == "__main__":
             config = load_config(config_filepath)
         except (FileNotFoundError, ValueError, IOError) as e:
             print(f"Error: {e}")
+            exit(1)
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            exit(1)
 
-    elif args.config:  # If config is not passed as an argument, prompt for it
-        print(f"Config provided. File: {config_path}")
-        config = load_config(config_path)
+    else:
         try:
-            bookends = config["bookends"]
-        except KeyError or TypeError or ValueError:
-            bookends = None
-        placeholders = config["placeholders"]
-    else:
-        print("No arguments provided. Use -h for help.")
-        exit(1)
+            config = load_config(config_path)
+            bookends = config.get("bookends", "%") #Handle missing bookends gracefully
+        except FileNotFoundError:
+            print(f"Error: Config file not found at {config_path}")
+            exit(1)
+        except json.JSONDecodeError:
+            print(f"Error: Invalid JSON in config file {config_path}")
+            exit(1)
+        except Exception as e:
+            print(f"An unexpected error occurred while loading config: {e}")
+            exit(1)
+
+
     proceed = False
-    openConfig = input(f"Open {config_path if config_path else config_filepath} with external program? (y/n): ")
-    if openConfig == 'y':
-        program = input(f"Open '{config_path if config_path else config_filepath}' "
-                        f"with which program? (e.g., notepad, notepad++, word): ")
-        config = handle_external_program(config_path if config_path else config_filepath, program)
-
-    else:
-        config = load_config(config_path if config_path else config_filepath)
-
-    placeholders = config["placeholders"]
-
     while not proceed:
-        print(f"Config file: {config_path if config_path else config_filepath}")
+        print(f"Config file: {config_path}")
         print("Placeholders:")
-        for key, value in placeholders.items():
+        for key, value in config["placeholders"].items():
             print(f"- {key}: {value}")
-        while bookends is None:
-            bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ")
-        while config is None:
-            config = load_config(config_path if config_path else config_filepath)
+        openConfig = input(f"Open {config_path} with external program? (y/n): ")
+        if openConfig.lower() == 'y':
+            program = input(f"Open '{config_path}' with which program? (e.g., notepad, notepad++, word): ")
+            try:
+                config = handle_external_program(config_path, program)
+            except FileNotFoundError:
+                print(f"Error: Program '{program}' not found.")
+                exit(1)
+            except Exception as e:
+                print(f"An error occurred while running external program: {e}")
+                exit(1)
+
         proceed = input("OK to proceed to generate document? (y / n): ").lower()
         if proceed == 'y':
             break
         elif proceed == 'n':
-            openConfig = input(f"Open {config_path if config_path else config_filepath} with external program? (y/n): ")
-            if openConfig == 'y':
-                program = input(f"Open '{config_path if config_path else config_filepath}' "
-                                f"with which program? (e.g., notepad, notepad++, word): ")
-                config = handle_external_program(config_path if config_path else config_filepath, program)
-            else:
-                config = load_config(config_path if config_path else config_filepath)
-            placeholders = config["placeholders"]
             continue
         else:
             print("Please enter a valid option y or n\n")
-    #config = load_config(config_path if config_path else config_filepath)
-    generate_document(config, bookend=bookends)
-    print("Document generated successfully!")
+
+    try:
+        generate_document(config, bookend=bookends)
+        print("Document generated successfully!")
+    except Exception as e:
+        print(f"An error occurred during document generation: {e}")
+        exit(1)
+
