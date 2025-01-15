@@ -175,4 +175,4 @@ config.json
 .venv2/
 .aider*
 mainDev.py
-
+Archive/*
