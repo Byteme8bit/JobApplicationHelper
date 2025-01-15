@@ -113,17 +113,17 @@ def build_config_from_template(template_path, bookends="%"):
         filename_parts = os.path.basename(template_path).split('-')
         config_filename = '-'.join(filename_parts[:2]) + "-config.json"
         config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
-        date = date.today().strftime("%Y-%m-%d")
+        current_date = date.today().strftime("%Y-%m-%d") #Renamed variable
         placeholders = extract_placeholders(template_path, bookends)
         config_data = {
             "configFileName": config_filename,
             "templateFilePath": template_path,
-            "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
+            "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{current_date}.docx"),
             "overwriteOutput": False,
             "bookends": bookends,
             "placeholders": placeholders
         }
-        placeholders["Date"] = date
+        placeholders["Date"] = current_date #Renamed variable
         with open(config_filepath, 'w') as outfile:
             json.dump(config_data, outfile, indent=4)
         return config_filepath
