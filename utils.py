@@ -5,20 +5,20 @@ import subprocess
 from docx import Document
 
 
-def handle_external_program(config_filepath, program):
-    """Handles the execution of an external program (e.g., notepad, notepad++, word)."""
+def open_config(config_filepath):
+    """Opens the config file in default application native to OS"""
     try:
         # Use os.startfile for better cross-platform compatibility
         os.startfile(config_filepath)  
-        input("Press Enter after reviewing the config file...") #Pause execution until user is ready
+        input("Press Enter after reviewing the config file...")  # Pause execution until user is ready
         return load_config(config_filepath)
 
     except FileNotFoundError:
-        print(f"Error: Config file '{config_filepath}' or program '{program}' not found.")
-        return None #Return None to indicate failure
+        print(f"Error: Config file '{config_filepath}' not found.")
+        return None  # Return None to indicate failure
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        return None #Return None to indicate failure
+        return None  # Return None to indicate failure
 
 
 def generate_document(config, bookend="%"):
@@ -28,7 +28,7 @@ def generate_document(config, bookend="%"):
 
     template_path = config.get("templateFilePath")
     output_path = config.get("outputFilePath")
-    placeholders = config.get("placeholders", {}) #Handle missing placeholders gracefully
+    placeholders = config.get("placeholders", {})  # Handle missing placeholders gracefully
 
     try:
         if os.path.exists(output_path):
@@ -69,7 +69,7 @@ def load_config(config_path):
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError, KeyError, IOError) as e:
         print(f"Error loading or processing config file: {e}")
-        return None #Return None to indicate failure
+        return None  # Return None to indicate failure
     except Exception as e:
         raise IOError(f"An error occurred while loading the config file: {e}")
 
