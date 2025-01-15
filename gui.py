@@ -3,7 +3,7 @@ from tkinter import filedialog, messagebox
 import json
 import os
 from tkinter import ttk
-from utils import generate_document, load_config
+from utils import generate_document, load_config, build_config_from_template
 
 
 def browse_config_file():
@@ -48,7 +48,7 @@ def generate_document_from_gui():
 
     try:
         placeholders = json.loads(placeholders_text_val)
-        generate_document(template_path_val, output_filename_val, placeholders)
+        generate_document({"templateFilePath": template_path_val, "outputFilePath": output_filename_val, "placeholders": placeholders})
         messagebox.showinfo("Success", "Document generated successfully!")
     except json.JSONDecodeError:
         messagebox.showerror("Error", "Invalid JSON format in placeholders.")
@@ -114,6 +114,21 @@ def insert_placeholder():
         messagebox.showerror("Error", "Both fields must be filled out.")
 
 
+def build_config_from_gui():
+    template_path_val = template_path.get()
+    if not template_path_val:
+        messagebox.showerror("Error", "Please select a template file first.")
+        return
+    bookends = "%" #Default bookends
+    config_filepath = build_config_from_template(template_path_val, bookends)
+    if config_filepath:
+        messagebox.showinfo("Success", f"Config file '{config_filepath}' created successfully.")
+        config_path.set(config_filepath)
+        load_config_file()
+    else:
+        messagebox.showerror("Error", "Error creating config file.")
+
+
 def run_gui():
     global config_path, template_path, output_filename, placeholder_var, replace_with_var, listbox
 
@@ -159,7 +174,7 @@ def run_gui():
     listbox.bind("<ButtonRelease-1>", edit_placeholder)
 
     # Build placeholders from template file
-    build_placeholders_button = ttk.Button(root, text="Build Placeholders", command=load_config_file)
+    build_placeholders_button = ttk.Button(root, text="Build Config", command=build_config_from_gui)
     build_placeholders_button.grid(row=3, column=buttonA, columnspan=buttonColumnspan, padx=5, pady=2)
 
     # Add placeholder button and entries

@@ -3,7 +3,7 @@ import os
 from datetime import date
 import json
 from run_gui import run_gui
-from utils import generate_document, load_config, extract_placeholders, open_config
+from utils import generate_document, load_config, extract_placeholders, open_config, build_config_from_template
 
 
 if __name__ == "__main__":
@@ -19,59 +19,45 @@ if __name__ == "__main__":
         run_gui()
         exit(0)  # Exit after GUI is launched
 
+    if args.BUILD:
+        template_path = args.BUILD
+        if not template_path:
+            template_path = input("Enter path to template file: ")
+        while not os.path.exists(template_path):
+            template_path = input("File not found. Enter valid path to template file: ")
+        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ") or "%"
+        config_filepath = build_config_from_template(template_path, bookends)
+        if config_filepath:
+            print(f"Config file '{config_filepath}' created successfully.")
+            config = load_config(config_filepath)
+            if config:
+                print("Placeholders:")
+                for key, value in config["placeholders"].items():
+                    print(f"- {key}: {value}")
+            else:
+                print("Error loading newly created config file.")
+        else:
+            print("Error creating config file.")
+        exit(0) #Exit after config creation
+
     config_path = args.config
     if config_path is None:
         config_path = input("Enter path to config file: ")
         while not os.path.exists(config_path):
             config_path = input("File not found. Enter valid path to config file: ")
 
-    if args.BUILD:
-        template_path = args.BUILD if args.BUILD else input("Enter path to template file: ")
-        while not os.path.exists(template_path):
-            template_path = input("File not found. Enter valid path to template file: ")
-        bookends = input("Enter up to 2 placeholder bookends (e.g., %% for %%placeholder%%) [Default is %]: ") or "%"
-        try:
-            filename_parts = os.path.basename(template_path).split('-')
-            config_filename = '-'.join(filename_parts[:2]) + "-config.json"
-            config_filepath = os.path.join(os.path.dirname(template_path), config_filename)
-            date = date.today().strftime("%Y-%m-%d")
-            placeholders = extract_placeholders(template_path, bookends)
-            config_data = {
-                "configFileName": config_filename,
-                "templateFilePath": template_path,
-                "outputFilePath": config_filename.replace("-config.json", f"-Cover Letter-{date}.docx"),
-                "overwriteOutput": False,
-                "bookends": bookends,
-                "placeholders": placeholders
-            }
-            placeholders["Date"] = date
-            with open(config_filepath, 'w') as outfile:
-                json.dump(config_data, outfile, indent=4)
-            print(f"Config file '{config_filepath}' created.")
-            print("Placeholders:")
-            for key, value in placeholders.items():
-                print(f"- {key}: {value}")
-            config = load_config(config_filepath)
-        except (FileNotFoundError, ValueError, IOError) as e:
-            print(f"Error: {e}")
-            exit(1)
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            exit(1)
-
-    else:
-        try:
-            config = load_config(config_path)
-            bookends = config.get("bookends", "%") #Handle missing bookends gracefully
-        except FileNotFoundError:
-            print(f"Error: Config file not found at {config_path}")
-            exit(1)
-        except json.JSONDecodeError:
-            print(f"Error: Invalid JSON in config file {config_path}")
-            exit(1)
-        except Exception as e:
-            print(f"An unexpected error occurred while loading config: {e}")
-            exit(1)
+    try:
+        config = load_config(config_path)
+        bookends = config.get("bookends", "%") #Handle missing bookends gracefully
+    except FileNotFoundError:
+        print(f"Error: Config file not found at {config_path}")
+        exit(1)
+    except json.JSONDecodeError:
+        print(f"Error: Invalid JSON in config file {config_path}")
+        exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred while loading config: {e}")
+        exit(1)
 
 
     proceed = False
