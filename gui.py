@@ -151,18 +151,16 @@ def run_gui():
     template_browse_button = ttk.Button(root, text="Browse", command=browse_template_file)
     template_browse_button.grid(row=1, column=buttonA, columnspan=buttonColumnspan, padx=5, pady=2)
 
-    # Output file name entry
-    output_filename_label = ttk.Label(root, text="Output File Name:")
-    output_filename_label.grid(row=2, column=labelCol, sticky=tk.W, padx=5, pady=2)
-    output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50)
-    output_filename_entry.grid(row=2, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
-
     # Placeholders listbox
     placeholders_label = ttk.Label(root, text="Placeholders:")
     placeholders_label.grid(row=3, column=labelCol, sticky=tk.W, padx=5, pady=2)
     listbox = tk.Listbox(root, height=10, width=50)
     listbox.grid(row=3, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="nsew")
     listbox.bind("<ButtonRelease-1>", edit_placeholder)
+
+    # Build placeholders from template file
+    build_placeholders_button = ttk.Button(root, text="Build Placeholders", command=load_config_file)
+    build_placeholders_button.grid(row=3, column=buttonA, columnspan=buttonColumnspan, padx=5, pady=2)
 
     # Add placeholder button and entries
     placeholder_label = ttk.Label(root, text="Placeholder:")
@@ -187,9 +185,15 @@ def run_gui():
     remove_placeholder_button = ttk.Button(root, text="Remove", command=remove_placeholder)
     remove_placeholder_button.grid(row=5, column=buttonA + 2, columnspan=buttonColumnspan, padx=5, pady=2)
 
+    # Output file name entry
+    output_filename_label = ttk.Label(root, text="Output File Name:")
+    output_filename_label.grid(row=6, column=labelCol, sticky=tk.W, padx=5, pady=2)
+    output_filename_entry = ttk.Entry(root, textvariable=output_filename, width=50)
+    output_filename_entry.grid(row=6, column=textboxCol, columnspan=textboxColumnspan, padx=5, pady=2, sticky="ew")
+
     # Generate button
     generate_button = ttk.Button(root, text="Generate Document", command=generate_document_from_gui)
-    generate_button.grid(row=6, column=labelCol, columnspan=10, pady=10, sticky="ew")
+    generate_button.grid(row=7, column=labelCol, columnspan=10, pady=10, sticky="ew")
 
     root.columnconfigure(textboxCol, weight=1)
     root.mainloop()

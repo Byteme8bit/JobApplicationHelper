@@ -3,7 +3,7 @@ import os
 from datetime import date
 import json
 from run_gui import run_gui
-from utils import generate_document, load_config, extract_placeholders, handle_external_program
+from utils import generate_document, load_config, extract_placeholders, open_config
 
 
 if __name__ == "__main__":
@@ -17,14 +17,13 @@ if __name__ == "__main__":
 
     if args.GUI:
         run_gui()
-        exit(0) #Exit after GUI is launched
+        exit(0)  # Exit after GUI is launched
 
     config_path = args.config
     if config_path is None:
         config_path = input("Enter path to config file: ")
         while not os.path.exists(config_path):
             config_path = input("File not found. Enter valid path to config file: ")
-
 
     if args.BUILD:
         template_path = args.BUILD if args.BUILD else input("Enter path to template file: ")
@@ -85,7 +84,7 @@ if __name__ == "__main__":
         if openConfig.lower() == 'y':
             program = input(f"Open '{config_path}' with which program? (e.g., notepad, notepad++, word): ")
             try:
-                config = handle_external_program(config_path, program)
+                config = open_config(config_path, program)
             except FileNotFoundError:
                 print(f"Error: Program '{program}' not found.")
                 exit(1)
